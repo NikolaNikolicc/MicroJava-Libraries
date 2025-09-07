@@ -10,6 +10,10 @@ javac -d symboltable $symboltableJavaFiles
 if ($LASTEXITCODE -ne 0) { Write-Host "Symboltable compilation failed!"; exit 1 }
 
 $destPath = "..\MicroJava-Compiler\lib"
+# Ensure destination folder exists
+if (-not (Test-Path $destPath)) {
+	New-Item -ItemType Directory -Path $destPath | Out-Null
+}
 
 # Package into new symboltable.jar in project root
 jar cf (Join-Path $destPath "symboltable.jar") -C "symboltable" .
