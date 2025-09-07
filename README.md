@@ -16,8 +16,7 @@ rs/
         structure/       # Data structures for symbol table
         visitors/        # Visitors for symbol table traversal and dumping
 scripts/
-  build-runtime.ps1      # PowerShell script to build the runtime JAR
-  build-symboltable.ps1  # PowerShell script to build the symbol table JAR
+  buildJars.ps1      # PowerShell script to build boh jars (symboltable and mj-runtime)
 ```
 
 ## Building the Libraries
