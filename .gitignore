@@ -1,0 +1,12 @@
+# Compiled Java classes
+*.class
+
+# JARs
+*.jar
+
+# VSCode settings
+.vscode/
+
+# OS junk
+.DS_Store
+Thumbs.db
