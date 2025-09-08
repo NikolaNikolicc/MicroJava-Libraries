@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.Stack;
 
 import rs.etf.pp1.symboltable.concepts.Module;
 
@@ -34,7 +35,7 @@ public class ModuleHandler {
     // map of module names to Module objects
     private final Map<String, Module> modules = new HashMap<>();
     // for detecting circular dependencies
-    private final Set<String> loadedModules = new HashSet<>();
+    private final Stack<Module> circularImportDetectionPath = new Stack<>();
 
     private Module createModule(String name) {
         if (modules.containsKey(name)) {
@@ -45,19 +46,49 @@ public class ModuleHandler {
         return newModule;
     }
 
-    public void openModule(String name){
-        currentModule = createModule(joinModulePath(name));
-    }
-
     /**
      * Spaja modulePath i ime modula u jedan string koristeći resolve.
      */
-    private String joinModulePath(String name) {
+    public String joinModulePath(String name) {
         return modulePath.resolve(name).toString();
     }
 
+    /**
+     * Proverava da li modul sa zadatim imenom postoji na putanji modulePath.
+     * @param name ime modula
+     * @return true ako postoji, false ako ne postoji
+     */
+    public boolean existsModuleOnPath(String name) {
+        String fullPath = joinModulePath(name);
+        return java.nio.file.Files.exists(java.nio.file.Paths.get(fullPath));
+    }
+
+    /**
+     * Ucitava modul sa zadatim imenom ako postoji u modules mapi, u suprotnom vraca noModule.
+     * Pretpostavlja se da modul postoji na putanji (provereno ranije).
+     */
+    public Module getModule(String name) {
+        String fullPath = joinModulePath(name);
+        Module m = modules.get(fullPath);
+        if (m != null) {
+            return m;
+        }
+        return noModule;
+    }
+
+    public void openModule(String name){
+        Module m = getModule(joinModulePath(name));
+        circularImportDetectionPath.push(currentModule);
+        if (circularImportDetectionPath.contains(m)) {
+            // we have a circular import (already in the path)
+            currentModule = noModule;
+        } else {
+            currentModule = createModule(joinModulePath(name));
+        }
+    }
+
     public void closeModule(){
-        currentModule = noModule;
+        currentModule = circularImportDetectionPath.pop();
     }
 
     public Module getCurrentModule() {

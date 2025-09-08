@@ -15,7 +15,7 @@ public class Module {
     // list of imported modules
     private List<Module> importedModules = new ArrayList<>();
     // list of single names that import this module
-    private List<ListNode> aliases = new ArrayList<>();
+    private List<ListNode> importedAliases = new ArrayList<>();
     // list of local symbols (Obj) declared in this module (including formal parameters and local variables)
     private List<Obj> locals = new ArrayList<>();
     // list of symbols (Obj) that this module exports
