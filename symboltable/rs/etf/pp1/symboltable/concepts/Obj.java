@@ -4,6 +4,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
 
+import rs.etf.pp1.symboltable.ModuleHandler;
 import rs.etf.pp1.symboltable.structure.SymbolDataStructure;
 import rs.etf.pp1.symboltable.visitors.SymbolTableVisitor;
 
@@ -43,6 +44,9 @@ public class Obj {
 	// Meth: kolekcija lokalnih promenljivih
 	// Prog: kolekcija simbola programa
 	private SymbolDataStructure locals;
+
+	// pointer to the parent module
+	private Module module;
 	
 	
 	public int getKind() {
@@ -55,6 +59,7 @@ public class Obj {
 	
 	public Obj(int kind, String name, Struct type) {
 		this(kind, name, type, NO_VALUE, NO_VALUE);
+		module = ModuleHandler.getInstance().getCurrentModule();
 	}
 
 	public Obj(int kind, String name, Struct type, int adr, int level) {
@@ -63,6 +68,7 @@ public class Obj {
 		this.type = type;
 		this.adr = adr;
 		this.level = level;
+		module = ModuleHandler.getInstance().getCurrentModule();
 	}
 	
 	/**
@@ -104,6 +110,14 @@ public class Obj {
 	
 	public void setLocals(SymbolDataStructure locals) {
 		this.locals = locals;
+	}
+
+	public void setModule(Module module) {
+		this.module = module;
+	}
+
+	public Module getModule() {
+		return module;
 	}
 
 	public boolean equals(Object o) {

@@ -29,6 +29,7 @@ public class Tab {
 	}
 	*/
 	public static final Obj noObj = new Obj(Obj.Var, "noObj", noType);
+	
 	public static Obj chrObj, ordObj, lenObj;
 
 	public static Scope currentScope; // tekuci opseg
