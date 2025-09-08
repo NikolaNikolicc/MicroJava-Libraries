@@ -111,30 +111,29 @@ public class ModuleHandler {
     }
 
     /**
-     * Opens a module with the given name and sets it as the current context.
+     * Opens a module with the given name and sets it as the current module.
      * Detects circular dependencies and returns noModule in that case.
      * @param name module name
      */
     public void openModule(String name){
         Module m = getModule(joinModulePath(name));
         circularImportDetectionPath.push(currentModule);
-        // save old context
+        // check for circular import
         if (circularImportDetectionPath.contains(m)) {
             // we have a circular import (already in the path)
             currentModule = noModule;
         } else {
+            // create/load new module
             currentModule = createModule(joinModulePath(name));
         }
-        // load new context
     }
 
     /**
      * Closes the current module and restores the previous context from the stack.
      */
     public void closeModule(){
-        // save old context
+        // restore previous current module from stack
         currentModule = circularImportDetectionPath.pop();
-        // load new context
     }
 
     /**

@@ -5,6 +5,7 @@ import java.io.*;
 import rs.etf.pp1.symboltable.Tab;
 import rs.etf.pp1.symboltable.concepts.Obj;
 import rs.etf.pp1.symboltable.concepts.Struct;
+import rs.etf.pp1.symboltable.concepts.Module;
 /****************************************************
 *  Generator koda za mikrojavu
 ****************************************************/
@@ -174,6 +175,22 @@ public class Code {
       default:
         error("Greska: Na levoj strani dodele mora biti promenljiva!");
     }
+  }
+
+  // cuva kontekst trenutnog modula u njegovom objektu
+  public static void saveContext(Module oldModule) {
+    oldModule.setCode(Run.code);
+    oldModule.setData(Run.data);
+    oldModule.setMainPC(Run.pc);
+    oldModule.setDataSize(Run.dataSize);
+  }
+
+  // postavlja kontekst novog modula u Run
+  public static void restoreContext(Module newModule) {
+    Run.code = newModule.getCode();
+    Run.data = newModule.getData();
+    Run.pc = newModule.getMainPC();
+    Run.dataSize = newModule.getDataSize();
   }
   
   

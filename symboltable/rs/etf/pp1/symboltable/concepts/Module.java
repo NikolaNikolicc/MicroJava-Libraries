@@ -22,7 +22,7 @@ public class Module {
     private List<ListNode> exportedSymbols = new ArrayList<>();
 
     // ----------------------------------CODE GEN----------------------------------------
-    private int code[];
+    private byte code[];
     private int data[];
     private int mainPC;
     private int dataSize;
@@ -35,6 +35,38 @@ public class Module {
     // getters and setters
     public String getName() {
         return name;
+    }
+
+    public byte[] getCode() {
+        return code;
+    }
+
+    public void setCode(byte[] code) {
+        this.code = code;
+    }
+
+    public int[] getData() {
+        return data;
+    }
+
+    public void setData(int[] data) {
+        this.data = data;
+    }
+
+    public int getMainPC() {
+        return mainPC;
+    }
+
+    public void setMainPC(int mainPC) {
+        this.mainPC = mainPC;
+    }
+
+    public int getDataSize() {
+        return dataSize;
+    }
+
+    public void setDataSize(int dataSize) {
+        this.dataSize = dataSize;
     }
 
 }
