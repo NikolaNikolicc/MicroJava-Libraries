@@ -8,14 +8,28 @@ import java.util.Stack;
 
 import rs.etf.pp1.symboltable.concepts.Module;
 
+/**
+ * Handler for working with modules and module contexts.
+ * Enables opening, closing, and loading modules, as well as circular dependency detection.
+ * Implemented as a singleton.
+ */
 public class ModuleHandler {
 
-    // Singleton pattern
-    private static ModuleHandler instance;
+    /** Singleton instance of the handler. */
+     private static ModuleHandler instance;
 
+    /**
+     * Private constructor for singleton pattern.
+     * Adds noModule to the modules map.
+     */
     private ModuleHandler() {
+        modules.put(noModule.getName(), noModule);
     }
 
+    /**
+     * Returns the single instance of the handler (singleton pattern).
+     * @return ModuleHandler instance
+     */
     public static ModuleHandler getInstance() {
         if (instance == null) {
             instance = new ModuleHandler();
@@ -23,18 +37,36 @@ public class ModuleHandler {
         }
         return instance;
     }
-    // default module for symbols not belonging to any module
+    /**
+     * Module for symbols that do not belong to any module (default context).
+     */
     public Module noModule = new Module("noModule");
-    // current module context (this attribute can be set only in open and close module methods)
+
+    /**
+     * Current module context (changes only in open/close methods).
+     */
     private Module currentModule = null;
-    // path where all modules are located
+
+    /**
+     * Path where all modules are located.
+     */
     public Path modulePath = Paths.get("");
 
-    // map of module names to Module objects
+    /**
+     * Map of all modules (key: path, value: Module object).
+     */
     private final Map<String, Module> modules = new HashMap<>();
-    // for detecting circular dependencies
+
+    /**
+     * Stack for detecting circular dependencies during module import.
+     */
     private final Stack<Module> circularImportDetectionPath = new Stack<>();
 
+    /**
+     * Creates a new module or returns an existing one from the map.
+     * @param name name or path of the module
+     * @return Module object
+     */
     private Module createModule(String name) {
         if (modules.containsKey(name)) {
             return modules.get(name);
@@ -45,16 +77,18 @@ public class ModuleHandler {
     }
 
     /**
-     * Spaja modulePath i ime modula u jedan string koristeći resolve.
+     * Joins modulePath and the module name into a single string using resolve.
+     * @param name module name
+     * @return string path to the module
      */
     public String joinModulePath(String name) {
         return modulePath.resolve(name).toString();
     }
 
     /**
-     * Proverava da li modul sa zadatim imenom postoji na putanji modulePath.
-     * @param name ime modula
-     * @return true ako postoji, false ako ne postoji
+     * Checks if a module with the given name exists at the modulePath.
+     * @param name module name
+     * @return true if exists, false otherwise
      */
     public boolean existsModuleOnPath(String name) {
         String fullPath = joinModulePath(name);
@@ -62,8 +96,10 @@ public class ModuleHandler {
     }
 
     /**
-     * Ucitava modul sa zadatim imenom ako postoji u modules mapi, u suprotnom vraca noModule.
-     * Pretpostavlja se da modul postoji na putanji (provereno ranije).
+     * Loads a module with the given name if it exists in the modules map, otherwise returns noModule.
+     * Assumes the module exists at the path (checked earlier).
+     * @param name module name
+     * @return Module object or noModule if not found
      */
     public Module getModule(String name) {
         String fullPath = joinModulePath(name);
@@ -74,21 +110,37 @@ public class ModuleHandler {
         return noModule;
     }
 
+    /**
+     * Opens a module with the given name and sets it as the current context.
+     * Detects circular dependencies and returns noModule in that case.
+     * @param name module name
+     */
     public void openModule(String name){
         Module m = getModule(joinModulePath(name));
         circularImportDetectionPath.push(currentModule);
+        // save old context
         if (circularImportDetectionPath.contains(m)) {
             // we have a circular import (already in the path)
             currentModule = noModule;
         } else {
             currentModule = createModule(joinModulePath(name));
         }
+        // load new context
     }
 
+    /**
+     * Closes the current module and restores the previous context from the stack.
+     */
     public void closeModule(){
+        // save old context
         currentModule = circularImportDetectionPath.pop();
+        // load new context
     }
 
+    /**
+     * Returns the currently active module (context).
+     * @return current Module
+     */
     public Module getCurrentModule() {
         return currentModule;
     }
