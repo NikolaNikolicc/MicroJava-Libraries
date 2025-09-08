@@ -3,9 +3,7 @@ package rs.etf.pp1.symboltable;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 import java.util.Stack;
 
 import rs.etf.pp1.symboltable.concepts.Module;
