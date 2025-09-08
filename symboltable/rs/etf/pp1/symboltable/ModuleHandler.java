@@ -46,7 +46,14 @@ public class ModuleHandler {
     }
 
     public void openModule(String name){
-        currentModule = createModule(modulePath + "\\" + name);
+        currentModule = createModule(joinModulePath(name));
+    }
+
+    /**
+     * Spaja modulePath i ime modula u jedan string koristeći resolve.
+     */
+    private String joinModulePath(String name) {
+        return modulePath.resolve(name).toString();
     }
 
     public void closeModule(){
