@@ -45,12 +45,7 @@ public class ModuleHandler {
     /**
      * Current module context (changes only in open/close methods).
      */
-    private Module currentModule = null;
-
-    /**
-     * Path where all modules are located.
-     */
-    public Path modulePath = Paths.get("");
+    private Module currentModule = noModule;
 
     /**
      * Map of all modules (key: path, value: Module object).
@@ -77,37 +72,23 @@ public class ModuleHandler {
     }
 
     /**
-     * Joins modulePath and the module name into a single string using resolve.
-     * @param name module name
-     * @return string path to the module
-     */
-    public String joinModulePath(String name) {
-        return modulePath.resolve(name).toString();
-    }
-
-    /**
      * Checks if a module with the given name exists at the modulePath.
      * @param name module name
      * @return true if exists, false otherwise
      */
     public boolean existsModuleOnPath(String name) {
-        String fullPath = joinModulePath(name);
-        return java.nio.file.Files.exists(java.nio.file.Paths.get(fullPath));
+        return java.nio.file.Files.exists(java.nio.file.Paths.get(name + ".mj"));
     }
 
     /**
-     * Loads a module with the given name if it exists in the modules map, otherwise returns noModule.
+     * Loads a module with the given name if it exists in the modules map, otherwise returns noModule. 
+     * Important: we are returning null if the module does not exist in the map because when we are not in any module currentModule is set to noModule so noModule is always on the circularImportDetectionPath, so if we are returning noModule here in case we don't find the module in the map we will always have a circular import detected which is not desired.
      * Assumes the module exists at the path (checked earlier).
      * @param name module name
-     * @return Module object or noModule if not found
+     * @return Module object or null if not found
      */
     public Module getModule(String name) {
-        String fullPath = joinModulePath(name);
-        Module m = modules.get(fullPath);
-        if (m != null) {
-            return m;
-        }
-        return noModule;
+        return modules.get(name);
     }
 
     /**
@@ -116,15 +97,15 @@ public class ModuleHandler {
      * @param name module name
      */
     public void openModule(String name){
-        Module m = getModule(joinModulePath(name));
+        Module m = getModule(name);
         circularImportDetectionPath.push(currentModule);
         // check for circular import
-        if (circularImportDetectionPath.contains(m)) {
+        if (m != null && circularImportDetectionPath.contains(m)) {
             // we have a circular import (already in the path)
             currentModule = noModule;
         } else {
             // create/load new module
-            currentModule = createModule(joinModulePath(name));
+            currentModule = createModule(name);
         }
     }
 

@@ -181,7 +181,7 @@ public class Code {
   public static void saveContext(Module oldModule) {
     oldModule.setCode(Run.code);
     oldModule.setData(Run.data);
-    oldModule.setMainPC(Run.pc);
+    oldModule.setMainPC(Run.startPC);
     oldModule.setDataSize(Run.dataSize);
   }
 
@@ -189,7 +189,7 @@ public class Code {
   public static void restoreContext(Module newModule) {
     Run.code = newModule.getCode();
     Run.data = newModule.getData();
-    Run.pc = newModule.getMainPC();
+    Run.startPC = newModule.getMainPC();
     Run.dataSize = newModule.getDataSize();
   }
   
