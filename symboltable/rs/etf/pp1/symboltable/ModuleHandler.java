@@ -1,5 +1,6 @@
 package rs.etf.pp1.symboltable;
 
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.HashMap;
@@ -72,12 +73,12 @@ public class ModuleHandler {
     }
 
     /**
-     * Checks if a module with the given name exists at the modulePath.
-     * @param name module name
+     * Checks if a module with the given name exists in project path
+     * @param name module name (with .mj extension)
      * @return true if exists, false otherwise
      */
-    public boolean existsModuleOnPath(String name) {
-        return java.nio.file.Files.exists(java.nio.file.Paths.get(name + ".mj"));
+    public boolean existsModuleOnPath(Path path) {
+        return Files.exists(path);
     }
 
     /**
