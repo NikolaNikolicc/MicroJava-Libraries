@@ -1,5 +1,6 @@
 package rs.etf.pp1.symboltable;
 
+import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -124,5 +125,54 @@ public class ModuleHandler {
      */
     public Module getCurrentModule() {
         return currentModule;
+    }
+
+    /**
+     * Converts a file path to a package name by replacing file separators with dots and removing the .mj extension if present.
+     * @param fullPath the full path to the module file
+     * @return the package name as a string
+     */
+    public String toPackageName(Path fullPath) {
+        String pathStr = fullPath.toString();
+
+        // Remove .mj extension if present
+        if (pathStr.endsWith(".mj")) {
+            pathStr = pathStr.substring(0, pathStr.length() - 3);
+        }
+
+        // Replace OS-specific separator with '.'
+        return pathStr.replace(File.separatorChar, '.');
+    }
+
+    /**
+     * Converts a package name to a file system path, replacing dots with file separators and adding the .mj extension if missing.
+     * @param packageName the package name
+     * @return the corresponding Path object
+     */
+    public Path fromPackageName(String packageName) {
+        // Replace '.' with OS-specific separator
+        String pathStr = packageName.replace('.', File.separatorChar);
+
+        // Add .mj extension if missing
+        if (!pathStr.endsWith(".mj")) {
+            pathStr += ".mj";
+        }
+
+        return Paths.get(pathStr);
+    }
+
+    /**
+     * Removes the file extension from the given path.
+     * @param path the path from which to remove the extension
+     * @return the path without its file extension
+     */
+    public Path removeExtension(Path path) {
+        String fileName = path.getFileName().toString();
+        int dotIndex = fileName.lastIndexOf('.');
+        String baseName = (dotIndex == -1) ? fileName : fileName.substring(0, dotIndex);
+
+        return path.getParent() != null
+                ? path.getParent().resolve(baseName)
+                : Paths.get(baseName);
     }
 }
