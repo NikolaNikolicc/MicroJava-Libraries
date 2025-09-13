@@ -3,14 +3,16 @@ package rs.etf.pp1.symboltable.concepts;
 import java.util.ArrayList;
 import java.util.List;
 
+import rs.etf.pp1.symboltable.visitors.SymbolTableVisitor;
+
 public class Module {
 
     private String name;
 
     // -----------------------------SEMANTIC ANALYSIS-------------------------------------
     public class ListNode {
-        private ListNode next;
-        private Obj obj;
+        public ListNode next;
+        public Obj obj;
     }
     // list of imported modules
     private List<Module> importedModules = new ArrayList<>();
@@ -35,6 +37,22 @@ public class Module {
     // getters and setters
     public String getName() {
         return name;
+    }
+
+    public List<Module> getImportedModules() {
+        return importedModules;
+    }
+
+    public List<ListNode> getImportedAliases() {
+        return importedAliases;
+    }
+
+    public List<Obj> getLocals() {
+        return locals;
+    }
+
+    public List<ListNode> getExportedSymbols() {
+        return exportedSymbols;
     }
 
     public byte[] getCode() {
@@ -67,6 +85,11 @@ public class Module {
 
     public void setDataSize(int dataSize) {
         this.dataSize = dataSize;
+    }
+
+    // print method
+    public void accept(SymbolTableVisitor stv) {
+        stv.visitModuleNode(this);
     }
 
 }

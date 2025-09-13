@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Stack;
 
 import rs.etf.pp1.symboltable.concepts.Module;
+import rs.etf.pp1.symboltable.visitors.SymbolTableVisitor;
 
 /**
  * Handler for working with modules and module contexts.
@@ -174,5 +175,17 @@ public class ModuleHandler {
         return path.getParent() != null
                 ? path.getParent().resolve(baseName)
                 : Paths.get(baseName);
+    }
+
+    /**
+     * Applies the given SymbolTableVisitor to all modules managed by this handler.
+     * This is typically used to traverse or print the contents of all modules.
+     *
+     * @param stv the SymbolTableVisitor to apply to each module
+     */
+    public void dumpModules(SymbolTableVisitor stv) {
+        for (Module module : modules.values()) {
+            module.accept(stv);
+        }
     }
 }
