@@ -20,8 +20,6 @@ public class Module {
     private List<ListNode> importedAliases = new ArrayList<>();
     // list of local symbols (Obj) declared in this module (including formal parameters and local variables)
     private List<Obj> locals = new ArrayList<>();
-    // list of symbols (Obj) that this module exports
-    private List<ListNode> exportedSymbols = new ArrayList<>();
 
     // ----------------------------------CODE GEN----------------------------------------
     private byte code[];
@@ -49,10 +47,6 @@ public class Module {
 
     public List<Obj> getLocals() {
         return locals;
-    }
-
-    public List<ListNode> getExportedSymbols() {
-        return exportedSymbols;
     }
 
     public byte[] getCode() {

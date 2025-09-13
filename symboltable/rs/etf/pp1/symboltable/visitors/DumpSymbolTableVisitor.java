@@ -20,10 +20,10 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
     private StringBuilder output = new StringBuilder("=== SYMBOL TABLE DUMP ===\n");
 
     // ASCII stil tabele
-    private static final String TABLE_BORDER = "+--------------------------------------------------------------------------------+\n";
-    private static final String HEADER_FORMAT = "| %-8s | %-20s | %-5s | %-5s | %-5s | %-20s |\n";
-    private static final String ROW_FORMAT    = "| %-8s | %-20s | %-5d | %-5d | %-5d | %-20s |\n";
-	private static final String SECTION_HEADER_FORMAT = "| %-78s |\n";
+	private static final String TABLE_BORDER = "+-------------------------------------------------------------------------------------------------------------------+\n";
+    private static final String HEADER_FORMAT = "| %-8s | %-20s | %-5s | %-5s | %-5s | %-20s | %-32s |\n";
+    private static final String ROW_FORMAT    = "| %-8s | %-20s | %-5d | %-5d | %-5d | %-20s | %-32s |\n";
+	private static final String SECTION_HEADER_FORMAT = "| %-113s |\n";
 
     private Obj currentObj = null;
 
@@ -60,7 +60,8 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
 					objToVisit.getAdr(),
 					objToVisit.getLevel(),
 					objToVisit.getFpPos(),
-					typeStr
+					typeStr,
+					objToVisit.getModule().getName()
         ));
 
         // If Obj is a Type of kind Class or Interface, print its members
@@ -73,7 +74,7 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
 				output.append(currentIndent.toString() + TABLE_BORDER);
                 output.append(currentIndent.toString() + String.format(SECTION_HEADER_FORMAT, "  Members of " + objToVisit.getName()));
                 output.append(currentIndent.toString() + TABLE_BORDER);
-                output.append(currentIndent.toString() + String.format(HEADER_FORMAT, "KIND", "NAME", "ADR", "LEVEL", "FPPOS", "TYPE"));
+                output.append(currentIndent.toString() + String.format(HEADER_FORMAT, "KIND", "NAME", "ADR", "LEVEL", "FPPOS", "TYPE", "MODULE"));
                 output.append(currentIndent.toString() + TABLE_BORDER);
                 for (Obj member : objToVisit.getType().getMembers()) {
 					output.append(currentIndent.toString() + TABLE_BORDER);
@@ -101,7 +102,7 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
 				sectionTitle += objToVisit.getName();
 				output.append(currentIndent.toString() + String.format(SECTION_HEADER_FORMAT,  sectionTitle));
                 output.append(currentIndent.toString() + TABLE_BORDER);
-                output.append(currentIndent.toString() + String.format(HEADER_FORMAT, "KIND", "NAME", "ADR", "LEVEL", "FPPOS", "TYPE"));
+                output.append(currentIndent.toString() + String.format(HEADER_FORMAT, "KIND", "NAME", "ADR", "LEVEL", "FPPOS", "TYPE", "MODULE"));
                 output.append(currentIndent.toString() + TABLE_BORDER);
                 for (Obj local : objToVisit.getLocalSymbols()) {
                     output.append(currentIndent.toString() + TABLE_BORDER);
@@ -126,7 +127,7 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
     public void visitScopeNode(Scope scope) {
         output.append("\n=== SCOPE CONTENT ===\n");
         output.append(TABLE_BORDER);
-        output.append(String.format(HEADER_FORMAT, "KIND", "NAME", "ADR", "LEVEL", "FPPOS", "TYPE"));
+        output.append(String.format(HEADER_FORMAT, "KIND", "NAME", "ADR", "LEVEL", "FPPOS", "TYPE", "MODULE"));
         output.append(TABLE_BORDER);
         for (Obj o : scope.values()) {
 			output.append(currentIndent.toString() + TABLE_BORDER);
@@ -167,17 +168,6 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
         } else {
             for (Obj local : moduleToVisit.getLocals()) {
                 local.accept(this);
-            }
-        }
-
-        // Exports
-        output.append("Exports:\n");
-        if (moduleToVisit.getExportedSymbols().isEmpty()) {
-            output.append("  <none>\n");
-        } else {
-            for (Module.ListNode export : moduleToVisit.getExportedSymbols()) {
-                output.append("  export -> ");
-                export.obj.accept(this);
             }
         }
     }
