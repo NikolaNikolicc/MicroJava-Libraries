@@ -25,7 +25,7 @@ Use the provided PowerShell scripts to compile and package the libraries:
 
 - **Symbol Table:**
   ```powershell
-  ./scripts/build-symboltable.ps1
+  ./scripts/buildJars.ps1
   ```
   This will compile all Java files under `rs/etf/pp1/symboltable` and package them into `symboltable.jar`.
 
