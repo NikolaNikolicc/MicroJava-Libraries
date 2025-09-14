@@ -141,35 +141,47 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
         output.append("\n=== MODULE: ").append(moduleToVisit.getName()).append(" ===\n");
 
         // Imports
-        output.append("Imports:\n");
+        output.append(currentIndent.toString() + TABLE_BORDER);
+        output.append(currentIndent.toString() + "Imports:\n");
+        output.append(currentIndent.toString() + TABLE_BORDER);
         if (moduleToVisit.getImportedModules().isEmpty()) {
-            output.append("  <none>\n");
+            output.append(currentIndent.toString() + String.format(SECTION_HEADER_FORMAT, "  <none>\n"));
         } else {
             for (Module imported : moduleToVisit.getImportedModules()) {
-                output.append("  ").append(imported.getName()).append("\n");
+                output.append(currentIndent.toString() + String.format(SECTION_HEADER_FORMAT, imported.getName()));
             }
         }
+        output.append(currentIndent.toString() + TABLE_BORDER);
 
         // Aliases
-        output.append("Aliases:\n");
+        output.append(currentIndent.toString() + TABLE_BORDER);
+        output.append(currentIndent.toString() + "Aliases:\n");
+        output.append(currentIndent.toString() + TABLE_BORDER);
         if (moduleToVisit.getImportedAliases().isEmpty()) {
-            output.append("  <none>\n");
+            output.append(currentIndent.toString() + TABLE_BORDER);
+            output.append(currentIndent.toString() + String.format(SECTION_HEADER_FORMAT, "  <none>\n"));
         } else {
             for (Module.ListNode alias : moduleToVisit.getImportedAliases()) {
-                output.append("  alias -> ");
+                output.append(currentIndent.toString() + TABLE_BORDER);
                 alias.obj.accept(this);
             }
         }
+        output.append(currentIndent.toString() + TABLE_BORDER);
 
         // Locals
-        output.append("Local symbols:\n");
+        output.append(currentIndent.toString() + TABLE_BORDER);
+        output.append(currentIndent.toString() + "Local symbols:\n");
+        output.append(currentIndent.toString() + TABLE_BORDER);
         if (moduleToVisit.getLocals().isEmpty()) {
-            output.append("  <none>\n");
+            output.append(currentIndent.toString() + TABLE_BORDER);
+            output.append(currentIndent.toString() + "  <none>\n");
         } else {
             for (Obj local : moduleToVisit.getLocals()) {
+                output.append(currentIndent.toString() + TABLE_BORDER);
                 local.accept(this);
             }
         }
+        output.append(currentIndent.toString() + TABLE_BORDER);
     }
 
     @Override
