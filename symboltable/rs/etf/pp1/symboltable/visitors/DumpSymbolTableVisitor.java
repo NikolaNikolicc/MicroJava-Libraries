@@ -132,27 +132,27 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
 
     @Override
     public void visitScopeNode(Scope scope) {
-        output.append("\n=== SCOPE CONTENT ===\n");
-        output.append(TABLE_BORDER);
-        output.append(String.format(HEADER_FORMAT, "KIND", "NAME", "ADR", "LEVEL", "FPPOS", "TYPE", "MODULE"));
-        output.append(TABLE_BORDER);
+        appendIndented("\n=== SCOPE CONTENT ===\n");
+        appendIndented(TABLE_BORDER);
+        appendIndented(String.format(HEADER_FORMAT, "KIND", "NAME", "ADR", "LEVEL", "FPPOS", "TYPE", "MODULE"));
+        appendIndented(TABLE_BORDER);
         for (Obj o : scope.values()) {
             appendIndented(TABLE_BORDER);
             o.accept(this);
         }
-        output.append(TABLE_BORDER);
+        appendIndented(TABLE_BORDER);
     }
 
     @Override
     public void visitModuleNode(Module moduleToVisit) {
-        output.append("\n=== MODULE: ").append(moduleToVisit.getName()).append(" ===\n");
+        appendIndented("\n=== MODULE: " + moduleToVisit.getName() + " ===\n");
 
         // Imports
         appendIndented(TABLE_BORDER);
-        appendIndented("  Imports:\n");
+        appendIndented(String.format(SECTION_HEADER_FORMAT, "  Imports:"));
         appendIndented(TABLE_BORDER);
         if (moduleToVisit.getImportedModules().isEmpty()) {
-            appendIndented(String.format(SECTION_HEADER_FORMAT, "  <none>\n"));
+            appendIndented(String.format(SECTION_HEADER_FORMAT, "  <none>"));
         } else {
             for (Module imported : moduleToVisit.getImportedModules()) {
                 appendIndented(String.format(SECTION_HEADER_FORMAT, imported.getName()));
@@ -162,11 +162,11 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
 
         // Aliases
         appendIndented(TABLE_BORDER);
-        appendIndented("  Aliases:\n");
+        appendIndented(String.format(SECTION_HEADER_FORMAT, "  Aliases:"));
         appendIndented(TABLE_BORDER);
         if (moduleToVisit.getImportedAliases().isEmpty()) {
             appendIndented(TABLE_BORDER);
-            appendIndented(String.format(SECTION_HEADER_FORMAT, "  <none>\n"));
+            appendIndented(String.format(SECTION_HEADER_FORMAT, "  <none>"));
         } else {
             for (Module.ListNode alias : moduleToVisit.getImportedAliases()) {
                 appendIndented(TABLE_BORDER);
@@ -177,11 +177,11 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
 
         // Locals
         appendIndented(TABLE_BORDER);
-        appendIndented("  Local symbols:\n");
+        appendIndented(String.format(SECTION_HEADER_FORMAT, "  Local symbols:"));
         appendIndented(TABLE_BORDER);
         if (moduleToVisit.getLocals().isEmpty()) {
             appendIndented(TABLE_BORDER);
-            appendIndented("  <none>\n");
+            appendIndented(String.format(SECTION_HEADER_FORMAT, "  <none>"));
         } else {
             for (Obj local : moduleToVisit.getLocals()) {
                 output.append(currentIndent.toString() + TABLE_BORDER);
