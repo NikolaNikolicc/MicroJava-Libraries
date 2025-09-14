@@ -86,4 +86,12 @@ public class Module {
         stv.visitModuleNode(this);
     }
 
+    public boolean importModule(Module module) {
+        if (module == null || importedModules.contains(module) || module == this) {
+            return false; // already imported or self-import
+        }
+        importedModules.add(module);
+        return true;
+    }
+
 }
