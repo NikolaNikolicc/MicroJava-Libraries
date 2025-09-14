@@ -160,17 +160,17 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
         }
         appendIndented(TABLE_BORDER);
 
-        // Aliases
+        // Imported names
         appendIndented(TABLE_BORDER);
-        appendIndented(String.format(SECTION_HEADER_FORMAT, "  Aliases:"));
+        appendIndented(String.format(SECTION_HEADER_FORMAT, "  Imported names:"));
         appendIndented(TABLE_BORDER);
-        if (moduleToVisit.getImportedAliases().isEmpty()) {
+        if (moduleToVisit.getImportedNames().isEmpty()) {
             appendIndented(TABLE_BORDER);
             appendIndented(String.format(SECTION_HEADER_FORMAT, "  <none>"));
         } else {
-            for (Module.ListNode alias : moduleToVisit.getImportedAliases()) {
+            for (Obj name : moduleToVisit.getImportedNames()) {
                 appendIndented(TABLE_BORDER);
-                alias.obj.accept(this);
+                name.accept(this);
             }
         }
         appendIndented(TABLE_BORDER);
