@@ -5,7 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
-import rs.etf.pp1.symboltable.structure.HashTableDataStructure;
+import rs.etf.pp1.symboltable.factory.SymbolTableFactory;
 import rs.etf.pp1.symboltable.structure.SymbolDataStructure;
 import rs.etf.pp1.symboltable.visitors.SymbolTableVisitor;
 
@@ -17,9 +17,9 @@ public class Module {
     // list of imported modules
     private List<Module> importedModules = new ArrayList<>();
     // list of single names that import this module, we are imitating Scope locals behavior because we must initialize our specific list
-    private SymbolDataStructure importedNames = new HashTableDataStructure();
+    private SymbolDataStructure importedNames;
     // list of local symbols (Obj) declared in this module (including formal parameters and local variables), we are imitating Obj locals behavior because we don't need to initialize our list, reference will do the job
-    private SymbolDataStructure locals = null;
+    private SymbolDataStructure locals;
 
     // ----------------------------------CODE GEN----------------------------------------
     private byte code[];
@@ -41,8 +41,8 @@ public class Module {
         return importedModules;
     }
 
-    public Collection<Obj> getImportedNames() {
-        return importedNames.symbols();
+    public SymbolDataStructure getImportedNames() {
+        return importedNames;
     }
 
     public Collection<Obj> getLocals() {
@@ -106,12 +106,11 @@ public class Module {
      * @param nameObj the Obj representing the name to import
      * @return true if the name was successfully imported, false otherwise
      */
-    public boolean importName(Obj nameObj) {
-        if (nameObj == null || importedNames.searchKey(nameObj.getName()) != null) {
-            return false;
+    public boolean addToImportedNames(Obj nameObj) {
+        if (importedNames == null) {
+            importedNames = SymbolTableFactory.instance().createSymbolTableDataStructure();
         }
-        importedNames.insertKey(nameObj);
-        return true;
+        return importedNames.insertKey(nameObj);
     }
 
     /**
@@ -130,5 +129,4 @@ public class Module {
     public void setLocals(SymbolDataStructure locals) {
         this.locals = locals;
     }
-
 }

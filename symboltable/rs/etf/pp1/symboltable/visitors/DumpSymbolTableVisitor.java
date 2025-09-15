@@ -40,13 +40,20 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
         output.append(currentIndent.toString()).append(str);
     }
 
+    /**
+     * Appends the table header to the output.
+     */
+    private void appendHeaderToOutput() {
+        appendIndented(String.format(HEADER_FORMAT, "KIND", "NAME", "ADR", "LEVEL", "FPPOS", "TYPE", "MODULE"));
+    }
+
     @Override
     public void visitObjNode(Obj objToVisit) {
     	// Zaglavlje tabele samo jednom, na početku dump-a
         if (output.toString().endsWith("=== SYMBOL TABLE DUMP ===\n")) {
-            output.append(TABLE_BORDER);
-            output.append(String.format(HEADER_FORMAT, "KIND", "NAME", "ADR", "LEVEL", "FPPOS", "TYPE"));
-            output.append(TABLE_BORDER);
+            appendIndented(TABLE_BORDER);
+            appendHeaderToOutput();
+            appendIndented(TABLE_BORDER);
         }
 
 		currentObj = objToVisit;
@@ -65,61 +72,50 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
         ));
 
         // If Obj is a Type of kind Class or Interface, print its members
-        if (objToVisit.getKind() == Obj.Type &&
-                objToVisit.getType() != null &&
+        if (objToVisit.getKind() == Obj.Type && objToVisit.getType() != null &&
                 (objToVisit.getType().getKind() == Struct.Class || objToVisit.getType().getKind() == Struct.Interface)) {
+            appendIndented(TABLE_BORDER);
+            nextIndentationLevel();
+            appendIndented(TABLE_BORDER);
+            String sectionTitle = "  Members of " + objToVisit.getName();
+            appendIndented(String.format(SECTION_HEADER_FORMAT, sectionTitle));
+            appendIndented(TABLE_BORDER);
             if (!objToVisit.getType().getMembers().isEmpty()) {
-                appendIndented(TABLE_BORDER);
-                nextIndentationLevel();
-                appendIndented(TABLE_BORDER);
-                appendIndented(String.format(SECTION_HEADER_FORMAT, "  Members of " + objToVisit.getName()));
-                appendIndented(TABLE_BORDER);
-                appendIndented(String.format(HEADER_FORMAT, "KIND", "NAME", "ADR", "LEVEL", "FPPOS", "TYPE", "MODULE"));
+                appendHeaderToOutput();
                 appendIndented(TABLE_BORDER);
                 for (Obj member : objToVisit.getType().getMembers()) {
                     appendIndented(TABLE_BORDER);
                     member.accept(this);
                 }
-				previousIndentationLevel();
             } else {
+                appendIndented(String.format(SECTION_HEADER_FORMAT, "  <none>"));
                 appendIndented(TABLE_BORDER);
-                nextIndentationLevel();
-                appendIndented(TABLE_BORDER);
-                String sectionTitle = "  Members of " + objToVisit.getName() + ": <none>";
-                appendIndented(String.format(SECTION_HEADER_FORMAT, sectionTitle));
-                appendIndented(TABLE_BORDER);
-                previousIndentationLevel();
             }
+            previousIndentationLevel();
         }
 
         // If Obj is a method or program, print its local symbols
         if (objToVisit.getKind() == Obj.Meth || objToVisit.getKind() == Obj.Prog) {
+            appendIndented(TABLE_BORDER);
+            nextIndentationLevel();
+            appendIndented(TABLE_BORDER);
+            String sectionTitle = (objToVisit.getKind() == Obj.Meth) ? "  Locals of method " : "  Locals of program ";
+            sectionTitle += objToVisit.getName();
+            appendIndented(String.format(SECTION_HEADER_FORMAT, sectionTitle));
+                appendIndented(TABLE_BORDER);
             if (!objToVisit.getLocalSymbols().isEmpty()) {
-                appendIndented(TABLE_BORDER);
-                nextIndentationLevel();
-                appendIndented(TABLE_BORDER);
-                String sectionTitle = (objToVisit.getKind() == Obj.Meth) ? "  Locals of method " : "  Locals of program ";
-                sectionTitle += objToVisit.getName();
-                appendIndented(String.format(SECTION_HEADER_FORMAT, sectionTitle));
-                appendIndented(TABLE_BORDER);
-                appendIndented(String.format(HEADER_FORMAT, "KIND", "NAME", "ADR", "LEVEL", "FPPOS", "TYPE", "MODULE"));
+                appendHeaderToOutput();
                 appendIndented(TABLE_BORDER);
                 for (Obj local : objToVisit.getLocalSymbols()) {
                     appendIndented(TABLE_BORDER);
                     local.accept(this);
                 }
                 if (objToVisit.getKind() == Obj.Meth) appendIndented(TABLE_BORDER);
-                previousIndentationLevel();
             } else {
+                appendIndented(String.format(SECTION_HEADER_FORMAT, "  <none>"));
                 appendIndented(TABLE_BORDER);
-                nextIndentationLevel();
-                appendIndented(TABLE_BORDER);
-                String sectionTitle = (objToVisit.getKind() == Obj.Meth) ? "  Locals of method " : "  Locals of program ";
-                sectionTitle += objToVisit.getName() + ": <none>";
-                appendIndented(String.format(SECTION_HEADER_FORMAT, sectionTitle));
-                appendIndented(TABLE_BORDER);
-                previousIndentationLevel();
             }
+            previousIndentationLevel();
         }
     }
 
@@ -127,7 +123,7 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
     public void visitScopeNode(Scope scope) {
         appendIndented("\n=== SCOPE CONTENT ===\n");
         appendIndented(TABLE_BORDER);
-        appendIndented(String.format(HEADER_FORMAT, "KIND", "NAME", "ADR", "LEVEL", "FPPOS", "TYPE", "MODULE"));
+        appendHeaderToOutput();
         appendIndented(TABLE_BORDER);
         for (Obj o : scope.values()) {
             appendIndented(TABLE_BORDER);
@@ -148,7 +144,7 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
             appendIndented(String.format(SECTION_HEADER_FORMAT, "  <none>"));
         } else {
             for (Module imported : moduleToVisit.getImportedModules()) {
-                appendIndented(String.format(SECTION_HEADER_FORMAT, imported.getName()));
+                appendIndented(String.format(SECTION_HEADER_FORMAT, "  " + imported.getName()));
             }
         }
         appendIndented(TABLE_BORDER);
@@ -157,11 +153,10 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
         appendIndented(TABLE_BORDER);
         appendIndented(String.format(SECTION_HEADER_FORMAT, "  Imported names:"));
         appendIndented(TABLE_BORDER);
-        if (moduleToVisit.getImportedNames().isEmpty()) {
-            appendIndented(TABLE_BORDER);
+        if (moduleToVisit.getImportedNames() == null) {
             appendIndented(String.format(SECTION_HEADER_FORMAT, "  <none>"));
         } else {
-            for (Obj name : moduleToVisit.getImportedNames()) {
+            for (Obj name : moduleToVisit.getImportedNames().symbols()) {
                 appendIndented(TABLE_BORDER);
                 name.accept(this);
             }
@@ -173,11 +168,10 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
         appendIndented(String.format(SECTION_HEADER_FORMAT, "  Local symbols:"));
         appendIndented(TABLE_BORDER);
         if (moduleToVisit.getLocals().isEmpty()) {
-            appendIndented(TABLE_BORDER);
             appendIndented(String.format(SECTION_HEADER_FORMAT, "  <none>"));
         } else {
             for (Obj local : moduleToVisit.getLocals()) {
-                output.append(currentIndent.toString() + TABLE_BORDER);
+                appendIndented(TABLE_BORDER);
                 local.accept(this);
             }
         }
@@ -186,7 +180,7 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
 
     @Override
     public void visitStructNode(Struct structToVisit) {
-		output.append(getTypeString(structToVisit));
+        appendIndented(getTypeString(structToVisit));
     }
 
     // helper methods
