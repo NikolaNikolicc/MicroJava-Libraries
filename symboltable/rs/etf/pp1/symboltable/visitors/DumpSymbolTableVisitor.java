@@ -140,10 +140,10 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
         appendIndented(TABLE_BORDER);
         appendIndented(String.format(SECTION_HEADER_FORMAT, "  Imports:"));
         appendIndented(TABLE_BORDER);
-        if (moduleToVisit.getImportedModules().isEmpty()) {
+        if (moduleToVisit.getImportedModules() == null) {
             appendIndented(String.format(SECTION_HEADER_FORMAT, "  <none>"));
         } else {
-            for (Module imported : moduleToVisit.getImportedModules()) {
+            for (Module imported : moduleToVisit.getImportedModules().modules()) {
                 appendIndented(String.format(SECTION_HEADER_FORMAT, "  " + imported.getName()));
             }
         }

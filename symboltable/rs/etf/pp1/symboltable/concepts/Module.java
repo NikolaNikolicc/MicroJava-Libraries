@@ -6,6 +6,7 @@ import java.util.Collections;
 import java.util.List;
 
 import rs.etf.pp1.symboltable.factory.SymbolTableFactory;
+import rs.etf.pp1.symboltable.structure.ModuleDataStructure;
 import rs.etf.pp1.symboltable.structure.SymbolDataStructure;
 import rs.etf.pp1.symboltable.visitors.SymbolTableVisitor;
 
@@ -15,7 +16,7 @@ public class Module {
 
     // -----------------------------SEMANTIC ANALYSIS-------------------------------------
     // list of imported modules
-    private List<Module> importedModules = new ArrayList<>();
+    private ModuleDataStructure importedModules;
     // list of single names that import this module, we are imitating Scope locals behavior because we must initialize our specific list
     private SymbolDataStructure importedNames;
     // list of local symbols (Obj) declared in this module (including formal parameters and local variables), we are imitating Obj locals behavior because we don't need to initialize our list, reference will do the job
@@ -37,7 +38,7 @@ public class Module {
         return name;
     }
 
-    public List<Module> getImportedModules() {
+    public ModuleDataStructure getImportedModules() {
         return importedModules;
     }
 
@@ -93,11 +94,13 @@ public class Module {
      * @return true if the module was successfully imported, false otherwise
      */
     public boolean importModule(Module module) {
-        if (module == null || importedModules.contains(module) || module == this) {
-            return false; // already imported or self-import
+        if (module == null || module == this) {
+            return false; // can't import null or self-import
         }
-        importedModules.add(module);
-        return true;
+        if (importedModules == null) {
+            importedModules = SymbolTableFactory.instance().createModuleDataStructure();
+        }
+        return importedModules.insertKey(module);
     }
 
     /**
@@ -107,6 +110,9 @@ public class Module {
      * @return true if the name was successfully imported, false otherwise
      */
     public boolean addToImportedNames(Obj nameObj) {
+        if (nameObj == null) {
+            return false; // cannot import null
+        }
         if (importedNames == null) {
             importedNames = SymbolTableFactory.instance().createSymbolTableDataStructure();
         }

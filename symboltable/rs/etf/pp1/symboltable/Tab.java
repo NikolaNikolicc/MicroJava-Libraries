@@ -1,5 +1,6 @@
 package rs.etf.pp1.symboltable;
 
+import rs.etf.pp1.symboltable.concepts.Module;
 import rs.etf.pp1.symboltable.concepts.Obj;
 import rs.etf.pp1.symboltable.concepts.Scope;
 import rs.etf.pp1.symboltable.concepts.Struct;
@@ -82,6 +83,10 @@ public class Tab {
 
 	public static void chainLocalSymbols(Struct innerClass) {
 		innerClass.setMembers(currentScope.getLocals());
+	}
+
+	public static void chainLocalSymbols(Module module) {
+		module.setLocals(currentScope.getLocals());
 	}
 	
 	/**
