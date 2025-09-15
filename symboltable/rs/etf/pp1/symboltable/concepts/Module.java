@@ -1,9 +1,12 @@
 package rs.etf.pp1.symboltable.concepts;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
-import rs.etf.pp1.symboltable.Tab;
+import rs.etf.pp1.symboltable.structure.HashTableDataStructure;
+import rs.etf.pp1.symboltable.structure.SymbolDataStructure;
 import rs.etf.pp1.symboltable.visitors.SymbolTableVisitor;
 
 public class Module {
@@ -13,10 +16,10 @@ public class Module {
     // -----------------------------SEMANTIC ANALYSIS-------------------------------------
     // list of imported modules
     private List<Module> importedModules = new ArrayList<>();
-    // list of single names that import this module
-    private List<Obj> importedNames = new ArrayList<>();
-    // list of local symbols (Obj) declared in this module (including formal parameters and local variables)
-    private List<Obj> locals = new ArrayList<>();
+    // list of single names that import this module, we are imitating Scope locals behavior because we must initialize our specific list
+    private SymbolDataStructure importedNames = new HashTableDataStructure();
+    // list of local symbols (Obj) declared in this module (including formal parameters and local variables), we are imitating Obj locals behavior because we don't need to initialize our list, reference will do the job
+    private SymbolDataStructure locals = null;
 
     // ----------------------------------CODE GEN----------------------------------------
     private byte code[];
@@ -38,12 +41,12 @@ public class Module {
         return importedModules;
     }
 
-    public List<Obj> getImportedNames() {
-        return importedNames;
+    public Collection<Obj> getImportedNames() {
+        return importedNames.symbols();
     }
 
-    public List<Obj> getLocals() {
-        return locals;
+    public Collection<Obj> getLocals() {
+        return (locals != null) ? locals.symbols() : Collections.emptyList();
     }
 
     public byte[] getCode() {
@@ -104,27 +107,28 @@ public class Module {
      * @return true if the name was successfully imported, false otherwise
      */
     public boolean importName(Obj nameObj) {
-        if (nameObj == null || importedNames.contains(nameObj)) {
+        if (nameObj == null || importedNames.searchKey(nameObj.getName()) != null) {
             return false;
         }
-        importedNames.add(nameObj);
+        importedNames.insertKey(nameObj);
         return true;
     }
 
     /**
-     * Finds a symbol with the given name in the local symbols of this module.
+     * Finds a symbol with the given name in the local symbols of this module. We must to return null because searchKey method returns null if the key is not found so basically we are covering both cases (locals is null or key is not found) with check if returned value is null.
      * @param name
      * @return Obj local if found, Tab.noObj otherwise
      */
     public Obj findNameInLocals(String name) {
-        for (Obj local : locals) {
-            if (local.getName().equals(name)) {
-                // Found matching local symbol
-                System.out.println("Found local symbol: " + local.getName());
-                return local;
-            }
-        }
-        return Tab.noObj;
+        return (locals != null) ? locals.searchKey(name) : null;
+    }
+
+    /**
+     * Sets the local symbols of this module to the given SymbolDataStructure.
+     * @param locals the SymbolDataStructure containing local symbols
+     */
+    public void setLocals(SymbolDataStructure locals) {
+        this.locals = locals;
     }
 
 }

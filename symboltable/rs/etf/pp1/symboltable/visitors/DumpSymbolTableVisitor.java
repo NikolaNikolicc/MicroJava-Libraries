@@ -1,6 +1,5 @@
 package rs.etf.pp1.symboltable.visitors;
 
-import rs.etf.pp1.symboltable.Tab;
 import rs.etf.pp1.symboltable.concepts.Module;
 import rs.etf.pp1.symboltable.concepts.Obj;
 import rs.etf.pp1.symboltable.concepts.Scope;
@@ -9,12 +8,6 @@ import rs.etf.pp1.symboltable.concepts.Struct;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Nadograđena verzija DumpSymbolTableVisitor-a koja:
- *  - ispisuje members za Obj kind==Type (class/interface),
- *  - ispisuje locals za Obj kind==Meth i Obj kind==Prog,
- *  - ako struct.getMembers() prazno, proverava obj.getLocalSymbols().
- */
 public class DumpSymbolTableVisitor extends SymbolTableVisitor {
 
     private StringBuilder output = new StringBuilder("=== SYMBOL TABLE DUMP ===\n");
