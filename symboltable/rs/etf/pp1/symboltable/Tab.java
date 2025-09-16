@@ -139,7 +139,11 @@ public class Tab {
 				if (resultObj != null) break;
 			}
 		}
-		return (resultObj != null) ? resultObj : noObj;
+		if (resultObj != null) {
+			return resultObj;
+		}
+
+		return ModuleHandler.getInstance().getCurrentModule().find(name);
 	}
 	
 	public static Scope currentScope() {

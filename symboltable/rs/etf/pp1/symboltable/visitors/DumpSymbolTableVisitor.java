@@ -10,7 +10,7 @@ import java.util.List;
 
 public class DumpSymbolTableVisitor extends SymbolTableVisitor {
 
-    private StringBuilder output = new StringBuilder("=== SYMBOL TABLE DUMP ===\n");
+    private StringBuilder output = new StringBuilder();
 
     // ASCII stil tabele
 	private static final String TABLE_BORDER = "+-------------------------------------------------------------------------------------------------------------------+\n";
@@ -49,13 +49,6 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
 
     @Override
     public void visitObjNode(Obj objToVisit) {
-    	// Zaglavlje tabele samo jednom, na početku dump-a
-        if (output.toString().endsWith("=== SYMBOL TABLE DUMP ===\n")) {
-            appendIndented(TABLE_BORDER);
-            appendHeaderToOutput();
-            appendIndented(TABLE_BORDER);
-        }
-
 		currentObj = objToVisit;
         String kindStr = getKindString(objToVisit);
         String typeStr = getTypeString(objToVisit.getType());

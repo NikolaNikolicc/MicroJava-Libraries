@@ -5,6 +5,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 
+import rs.etf.pp1.symboltable.Tab;
 import rs.etf.pp1.symboltable.factory.SymbolTableFactory;
 import rs.etf.pp1.symboltable.structure.ModuleDataStructure;
 import rs.etf.pp1.symboltable.structure.SymbolDataStructure;
@@ -120,19 +121,49 @@ public class Module {
     }
 
     /**
-     * Finds a symbol with the given name in the local symbols of this module. We must to return null because searchKey method returns null if the key is not found so basically we are covering both cases (locals is null or key is not found) with check if returned value is null.
-     * @param name
-     * @return Obj local if found, Tab.noObj otherwise
-     */
-    public Obj findNameInLocals(String name) {
-        return (locals != null) ? locals.searchKey(name) : null;
-    }
-
-    /**
      * Sets the local symbols of this module to the given SymbolDataStructure.
      * @param locals the SymbolDataStructure containing local symbols
      */
     public void setLocals(SymbolDataStructure locals) {
         this.locals = locals;
     }
+
+    public Obj findNameInImportedNames(String name) {
+        return (importedNames != null) ? importedNames.searchKey(name) : null;
+    }
+
+    public Obj findNameInLocals(String name) {
+        return (locals != null) ? locals.searchKey(name) : null;
+    }
+
+    public Obj findNameInImportedModules(String name) {
+        if (importedModules != null) {
+            for (Module m : importedModules.modules()) {
+                Obj o = m.findNameInLocals(name);
+                if (o != null) {
+                    return o;
+                }
+            }
+        }
+        return null;
+    }
+
+    /**
+     * Finds a name in the following order: locals, imported names, imported modules.
+     * @param name
+     * @return the found Obj or null if not found
+     */
+    public Obj find(String name) {
+        Obj o = findNameInLocals(name);
+        if (o != null) {
+            return o;
+        }
+        o = findNameInImportedNames(name);
+        if (o != null) {
+            return o;
+        }
+        o = findNameInImportedModules(name);
+        return (o != null) ? o : Tab.noObj;
+    }
+
 }
