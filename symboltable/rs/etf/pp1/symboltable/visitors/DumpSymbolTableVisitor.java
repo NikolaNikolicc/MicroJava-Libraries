@@ -10,7 +10,7 @@ import java.util.List;
 
 public class DumpSymbolTableVisitor extends SymbolTableVisitor {
 
-    private StringBuilder output = new StringBuilder();
+    private StringBuilder output = new StringBuilder("\n");
 
     // ASCII stil tabele
 	private static final String TABLE_BORDER = "+-------------------------------------------------------------------------------------------------------------------+\n";
@@ -127,8 +127,8 @@ public class DumpSymbolTableVisitor extends SymbolTableVisitor {
 
     @Override
     public void visitModuleNode(Module moduleToVisit) {
-        appendIndented("\n=== MODULE: " + moduleToVisit.getName() + " ===\n");
-
+        appendIndented(TABLE_BORDER);
+        appendIndented(String.format(SECTION_HEADER_FORMAT, " MODULE: " + moduleToVisit.getName() + ", module index: " + moduleToVisit.getIndex()));
         // Imports
         appendIndented(TABLE_BORDER);
         appendIndented(String.format(SECTION_HEADER_FORMAT, "  Imports:"));

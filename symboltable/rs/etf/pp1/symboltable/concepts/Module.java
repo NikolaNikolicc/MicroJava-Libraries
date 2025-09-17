@@ -1,9 +1,7 @@
 package rs.etf.pp1.symboltable.concepts;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
 
 import rs.etf.pp1.symboltable.Tab;
 import rs.etf.pp1.symboltable.factory.SymbolTableFactory;
