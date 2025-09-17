@@ -14,6 +14,7 @@ import rs.etf.pp1.symboltable.visitors.SymbolTableVisitor;
 public class Module {
 
     private String name;
+    private int index;
 
     // -----------------------------SEMANTIC ANALYSIS-------------------------------------
     // list of imported modules
@@ -30,13 +31,18 @@ public class Module {
     private int dataSize;
 
     // constructors
-    public Module(String name) {
+    public Module(String name, int index) {
         this.name = name;
+        this.index = index;
     }
 
     // getters and setters
     public String getName() {
         return name;
+    }
+
+    public int getIndex() {
+        return index;
     }
 
     public ModuleDataStructure getImportedModules() {
@@ -119,6 +125,29 @@ public class Module {
         }
         return importedNames.insertKey(nameObj);
     }
+
+    /**
+     * Recursively adds all transitive imported modules to this module's imports.
+     * @param module
+     */
+    private void addTransitiveImportedModules(Module module) {
+        if (this.importedModules == null) {
+            return;
+        }
+        for (Module m : module.importedModules.modules()) {
+            module.importModule(m);
+            m.addTransitiveImportedModules(module);
+        }
+    }
+
+    /**
+     * Adds all transitive imports of the given module to this module's imports.
+     * @param module the module whose transitive imports to add
+     */
+    public void addAllTransitiveImports() {
+        addTransitiveImportedModules(this);
+    }
+
 
     /**
      * Sets the local symbols of this module to the given SymbolDataStructure.

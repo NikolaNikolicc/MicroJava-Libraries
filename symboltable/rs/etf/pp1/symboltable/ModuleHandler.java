@@ -43,7 +43,7 @@ public class ModuleHandler {
     /**
      * Module for symbols that do not belong to any module (default context).
      */
-    public Module noModule = new Module("noModule");
+    public Module noModule = new Module("noModule", -1);
 
     /**
      * Current module context (changes only in open/close methods).
@@ -60,6 +60,9 @@ public class ModuleHandler {
      */
     private final Stack<Module> circularImportDetectionPath = new Stack<>();
 
+
+    int globalModuleIndex = 0;
+
     /**
      * Creates a new module or returns an existing one from the map.
      * @param name name or path of the module
@@ -69,7 +72,7 @@ public class ModuleHandler {
         if (modules.containsKey(name)) {
             return modules.get(name);
         }
-        Module newModule = new Module(name);
+        Module newModule = new Module(name, globalModuleIndex++);
         modules.put(name, newModule);
         return newModule;
     }
