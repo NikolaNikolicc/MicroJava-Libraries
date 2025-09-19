@@ -106,10 +106,6 @@ public class ModuleHandler {
         circularImportDetectionPath.push(currentModule);
     }
 
-    public Stack<Module> getCircularImportDetectionPath() {
-        return circularImportDetectionPath;
-    }
-
     public boolean isCircularImport(String name) {
         return circularImportDetectionPath.contains(getModule(name));
     }
