@@ -4,11 +4,11 @@ import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Stack;
 
 import rs.etf.pp1.symboltable.concepts.Module;
+import rs.etf.pp1.symboltable.factory.SymbolTableFactory;
+import rs.etf.pp1.symboltable.structure.ModuleDataStructure;
 import rs.etf.pp1.symboltable.visitors.SymbolTableVisitor;
 
 /**
@@ -26,7 +26,8 @@ public class ModuleHandler {
      * Adds noModule to the modules map.
      */
     private ModuleHandler() {
-        modules.put(noModule.getName(), noModule);
+        modules = SymbolTableFactory.instance().createModuleDataStructure();
+        modules.insertKey(noModule);
     }
 
     /**
@@ -54,7 +55,7 @@ public class ModuleHandler {
     /**
      * Map of all modules (key: path, value: Module object).
      */
-    private final Map<String, Module> modules = new HashMap<>();
+    private ModuleDataStructure modules;
 
     /**
      * Stack for detecting circular dependencies during module import.
@@ -70,12 +71,10 @@ public class ModuleHandler {
      * @return Module object
      */
     private Module createModule(String name) {
-        if (modules.containsKey(name)) {
-            return modules.get(name);
+        if (modules.searchKey(name) == null) {
+            modules.insertKey(new Module(name, globalModuleIndex++));
         }
-        Module newModule = new Module(name, globalModuleIndex++);
-        modules.put(name, newModule);
-        return newModule;
+        return modules.searchKey(name);
     }
 
     /**
@@ -86,7 +85,7 @@ public class ModuleHandler {
      * @return Module object or null if not found
      */
     public Module getModule(String name) {
-        return modules.get(name);
+        return modules.searchKey(name);
     }
 
     /**
@@ -186,7 +185,7 @@ public class ModuleHandler {
      * @param stv the SymbolTableVisitor to apply to each module
      */
     public void dumpModules(SymbolTableVisitor stv) {
-        for (Module module : modules.values()) {
+        for (Module module : modules.modules()) {
             module.accept(stv);
         }
     }
