@@ -37,6 +37,7 @@ public class ModuleHandler {
         if (instance == null) {
             instance = new ModuleHandler();
             instance.currentModule = instance.noModule;
+            instance.circularImportDetectionPath.push(instance.currentModule);
         }
         return instance;
     }
@@ -95,15 +96,22 @@ public class ModuleHandler {
      */
     public void openModule(String name){
         Module m = getModule(name);
-        circularImportDetectionPath.push(currentModule);
         // check for circular import
-        if (m != null && circularImportDetectionPath.contains(m)) {
-            // we have a circular import (already in the path)
-            currentModule = noModule;
-        } else {
-            // create/load new module
+        if (m == null) {
             currentModule = createModule(name);
+        } else {
+            // it is possible that we have loaded a module in some other branch of graph
+            currentModule = m;
         }
+        circularImportDetectionPath.push(currentModule);
+    }
+
+    public Stack<Module> getCircularImportDetectionPath() {
+        return circularImportDetectionPath;
+    }
+
+    public boolean isCircularImport(String name) {
+        return circularImportDetectionPath.contains(getModule(name));
     }
 
     /**
@@ -111,7 +119,8 @@ public class ModuleHandler {
      */
     public void closeModule(){
         // restore previous current module from stack
-        currentModule = circularImportDetectionPath.pop();
+        circularImportDetectionPath.pop();
+        currentModule = circularImportDetectionPath.peek();
     }
 
     /**
