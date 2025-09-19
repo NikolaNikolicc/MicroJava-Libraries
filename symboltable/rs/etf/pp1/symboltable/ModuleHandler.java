@@ -78,15 +78,6 @@ public class ModuleHandler {
     }
 
     /**
-     * Checks if a module with the given name exists in project path
-     * @param name module name (with .mj extension)
-     * @return true if exists, false otherwise
-     */
-    public boolean existsModuleOnPath(Path path) {
-        return Files.exists(path);
-    }
-
-    /**
      * Loads a module with the given name if it exists in the modules map, otherwise returns noModule. 
      * Important: we are returning null if the module does not exist in the map because when we are not in any module currentModule is set to noModule so noModule is always on the circularImportDetectionPath, so if we are returning noModule here in case we don't find the module in the map we will always have a circular import detected which is not desired.
      * Assumes the module exists at the path (checked earlier).
@@ -132,6 +123,15 @@ public class ModuleHandler {
     }
 
     /**
+     * Checks if a module with the given name exists in project path
+     * @param name module name (with .mj extension)
+     * @return true if exists, false otherwise
+     */
+    public boolean existsModuleOnPath(Path path) {
+        return Files.exists(Paths.get(path.toString() + ".mj"));
+    }
+
+    /**
      * Converts a file path to a package name by replacing file separators with dots and removing the .mj extension if present.
      * @param fullPath the full path to the module file
      * @return the package name as a string
@@ -156,12 +156,6 @@ public class ModuleHandler {
     public Path fromPackageName(String packageName) {
         // Replace '.' with OS-specific separator
         String pathStr = packageName.replace('.', File.separatorChar);
-
-        // Add .mj extension if missing
-        if (!pathStr.endsWith(".mj")) {
-            pathStr += ".mj";
-        }
-
         return Paths.get(pathStr);
     }
 

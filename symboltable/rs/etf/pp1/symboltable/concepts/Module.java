@@ -132,7 +132,7 @@ public class Module {
         if (this.importedModules == null) {
             return;
         }
-        for (Module m : module.importedModules.modules()) {
+        for (Module m : this.importedModules.modules()) {
             module.importModule(m);
             m.addTransitiveImportedModules(module);
         }
@@ -145,7 +145,6 @@ public class Module {
     public void addAllTransitiveImports() {
         addTransitiveImportedModules(this);
     }
-
 
     /**
      * Sets the local symbols of this module to the given SymbolDataStructure.
