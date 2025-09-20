@@ -20,6 +20,7 @@ public class Code {
   public static boolean greska=false; // flag da li je prijavljena neka  greske 
   
   public static String moduleName = "";
+  public static int moduleIndex = -1;
   public static ModuleDataStructure moduleMap;
 
   public static final int		// instruction codes
@@ -225,7 +226,8 @@ public class Code {
       put4(mainPc);
       long ts = System.currentTimeMillis() / 1000L;
       put4((int) ts);    // timestamp
-      putString(moduleName, Run.delimiter2);   // module name
+      putString(moduleName, Run.delimiter1);   // module name
+      put4(moduleIndex); // module index
       putModuleMap();    // module map
       s.write(buf, codeSize, pc - codeSize);	// header
       s.write(buf, 0, codeSize);				// code

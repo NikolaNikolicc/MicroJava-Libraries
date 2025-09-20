@@ -11,14 +11,17 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 
 public class Run {
+
+    static Context currContext;
+
     static boolean debug;
-    static byte[] code;
-    static int[] data;
+    // static byte[] code;
+    // static int[] data;
     static int[] heap;
     static int[] stack;
     static int[] local;
-    static int dataSize;
-    static int startPC;
+    // static int dataSize;
+    // static int startPC;
     static int pc;
     static int fp;
     static int sp;
@@ -129,7 +132,7 @@ public class Run {
     }
 
     static byte next(boolean var0) {
-        byte var1 = code[pc++];
+        byte var1 = currContext.code[pc++];
         if (debug && var0) {
             System.out.print(var1 + " ");
         }
@@ -155,7 +158,7 @@ public class Run {
         return var0;
     }
 
-    static void load(String var0) throws IOException, FormatException {
+    static void load(Context context, String var0) throws IOException, FormatException {
         byte[] var2 = new byte[2];
         DataInputStream var3 = new DataInputStream(new FileInputStream(var0));
         var3.read(var2, 0, 2);
@@ -166,27 +169,30 @@ public class Run {
         if (var1 <= 0) {
             throw new FormatException("codeSize <= 0");
         } 
-        dataSize = var3.readInt();
+        int dataSize = var3.readInt();
         if (dataSize < 0) {
             throw new FormatException("dataSize < 0");
         } 
-        startPC = var3.readInt();
-        if (startPC < 0 || startPC >= var1) {
+        context.setDataSize(dataSize);
+        currContext.startPC = var3.readInt();
+        if (currContext.startPC < 0 || currContext.startPC >= var1) {
             throw new FormatException("startPC out of code area");
         }
-        int timestamp = var3.readInt();
-        System.out.println("Timestamp: " + timestamp);
+        // read timestamp
+        currContext.timestamp = var3.readInt();
+        // read module name
         StringBuilder moduleNameBuilder = new StringBuilder();
-        
         byte[] c = new byte[1];
         var3.read(c);
-        while (c[0] != delimiter2) {
+        while (c[0] != delimiter1) {
             moduleNameBuilder.append((char)c[0]);
             var3.read(c);
         }
-        String moduleName = moduleNameBuilder.toString();
-        System.out.println("Module name: " + moduleName + ", timestamp: " + timestamp);
-
+        // read module index
+        currContext.moduleIndex = var3.readInt();
+        currContext.moduleName = moduleNameBuilder.toString();
+        System.out.println("Module name: " + currContext.moduleName + ", index: " + currContext.moduleIndex + ", timestamp: " + currContext.timestamp);
+        // read module map
         var3.read(c);
         while (true) {
             StringBuilder entryNameBuilder = new StringBuilder();
@@ -197,11 +203,12 @@ public class Run {
             String entryName = entryNameBuilder.toString();
             if (c[0] == delimiter2) break;
             int modIndex = var3.readInt();
+            currContext.addEntry(modIndex, entryName);
             System.out.println("  Entry: " + entryName + " -> " + modIndex);
             var3.read(c);
         }
-        code = new byte[var1];
-        var3.read(code, 0, var1);
+        currContext.code = new byte[var1];
+        var3.read(currContext.code, 0, var1);
     }
 
     static int alloc(int var0) throws VMException {
@@ -257,7 +264,7 @@ public class Run {
     }
 
     static void printInstr() {
-        byte var0 = code[pc - 1];
+        byte var0 = currContext.code[pc - 1];
         String var1 = var0 > 0 && var0 <= 58 ? opcode[var0] : opcode[0];
         printNum(pc - 1, 5);
         System.out.print(": " + var1 + " ");
@@ -272,7 +279,7 @@ public class Run {
     }
 
     static void interpret() {
-        pc = startPC;
+        pc = currContext.startPC;
         if (debug) {
             System.out.println();
             System.out.println("  pos: instruction operands");
@@ -309,10 +316,10 @@ public class Run {
                         local[fp + var0] = pop();
                         break;
                     case 11:
-                        push(data[next2(true)]);
+                        push(currContext.data[next2(true)]);
                         break;
                     case 12:
-                        data[next2(true)] = pop();
+                        currContext.data[next2(true)] = pop();
                         break;
                     case 13:
                         int var31 = pop();
@@ -605,27 +612,27 @@ public class Run {
                         int var15 = -1;
                         int var1 = pop();
 
-                        for(int var33 = data[var1++]; var33 != -2; var33 = data[var1++]) {
+                        for(int var33 = currContext.data[var1++]; var33 != -2; var33 = currContext.data[var1++]) {
                             var15 = next4();
                             if (var15 != var33 || var15 == -1) {
                                 if (var15 == -1 && var33 == -1) {
-                                    var13 = data[var1];
+                                    var13 = currContext.data[var1];
                                     var14 = true;
                                     break;
                                 }
 
                                 if (var15 == -1 && var33 != -1) {
-                                    for(pc = var12; var33 != -1; var33 = data[var1++]) {
+                                    for(pc = var12; var33 != -1; var33 = currContext.data[var1++]) {
                                     }
 
                                     ++var1;
-                                    int var67 = data[var1];
+                                    int var67 = currContext.data[var1];
                                 } else {
-                                    for(pc = var12; var33 != -1; var33 = data[var1++]) {
+                                    for(pc = var12; var33 != -1; var33 = currContext.data[var1++]) {
                                     }
 
                                     ++var1;
-                                    int var10000 = data[var1];
+                                    int var10000 = currContext.data[var1];
                                 }
                             }
                         }
@@ -688,9 +695,10 @@ public class Run {
             System.out.println("Syntax: java ssw.mj.Run filename [-debug]");
         } else {
             try {
-                load(var1);
+                currContext = new Context();
+                load(currContext, var1);
                 heap = new int[100000];
-                data = new int[dataSize];
+                // currContext.data = new int[dataSize];
                 stack = new int[30];
                 local = new int[400];
                 fp = 0;
