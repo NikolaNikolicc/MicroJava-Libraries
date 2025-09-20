@@ -1,10 +1,12 @@
 package rs.etf.pp1.mj.runtime;
 
 import java.io.*;
+import java.util.HashMap;
 
 import rs.etf.pp1.symboltable.Tab;
 import rs.etf.pp1.symboltable.concepts.Obj;
 import rs.etf.pp1.symboltable.concepts.Struct;
+import rs.etf.pp1.symboltable.structure.ModuleDataStructure;
 import rs.etf.pp1.symboltable.concepts.Module;
 /****************************************************
 *  Generator koda za mikrojavu
@@ -208,7 +210,44 @@ public class Code {
   }
   
   // Writes the code buffer to the output stream
-	public static void write(OutputStream s) {
+	// public static void write(OutputStream s) {
+	// 	int codeSize;
+	// 	try {
+	// 		codeSize = pc;
+	// 		put('M'); put('J');
+	// 		put4(codeSize);
+	// 		put4(dataSize);
+	// 		put4(mainPc);
+	// 		s.write(buf, codeSize, pc - codeSize);	// header
+	// 		s.write(buf, 0, codeSize);				// code
+	// 		s.close();
+	// 	} catch(IOException e) {
+	// 		 error("Greska pri upisu u izlazni fajl");
+	// 	}
+	// }
+
+    public static void putString(String s, int terminator) {
+        for (int i = 0; i < s.length(); i++) {
+            put((int) s.charAt(i));
+        }
+        put(terminator);
+    }
+
+    public static void putModuleMap() {
+    for (Module m : moduleMap.modules()) {
+        String name = m.getName();
+        int index = m.getIndex();
+
+        putString(name, -1);   // upiši ime sa terminatorom -1
+        put4(index);       // upiši indeks kao 4B
+      }
+      put(-2); // kraj mape
+    }
+
+    public static String moduleName = "";
+    public static ModuleDataStructure moduleMap;
+
+  	public static void write(OutputStream s) {
 		int codeSize;
 		try {
 			codeSize = pc;
@@ -216,6 +255,10 @@ public class Code {
 			put4(codeSize);
 			put4(dataSize);
 			put4(mainPc);
+      // long ts = System.currentTimeMillis() / 1000L;
+      // put4((int) ts);    // timestamp
+      // putString(moduleName, -2);   // module name
+      // putModuleMap();    // module map
 			s.write(buf, codeSize, pc - codeSize);	// header
 			s.write(buf, 0, codeSize);				// code
 			s.close();

@@ -156,27 +156,23 @@ public class Run {
         byte[] var2 = new byte[2];
         DataInputStream var3 = new DataInputStream(new FileInputStream(var0));
         var3.read(var2, 0, 2);
-        if (var2[0] == 77 && var2[1] == 74) {
-            int var1 = var3.readInt();
-            if (var1 <= 0) {
-                throw new FormatException("codeSize <= 0");
-            } else {
-                dataSize = var3.readInt();
-                if (dataSize < 0) {
-                    throw new FormatException("dataSize < 0");
-                } else {
-                    startPC = var3.readInt();
-                    if (startPC >= 0 && startPC < var1) {
-                        code = new byte[var1];
-                        var3.read(code, 0, var1);
-                    } else {
-                        throw new FormatException("startPC not in code area");
-                    }
-                }
-            }
-        } else {
+        if (var2[0] != 77 || var2[1] != 74) {
             throw new FormatException("wrong marker");
+        }        
+        int var1 = var3.readInt();
+        if (var1 <= 0) {
+            throw new FormatException("codeSize <= 0");
+        } 
+        dataSize = var3.readInt();
+        if (dataSize < 0) {
+            throw new FormatException("dataSize < 0");
+        } 
+        startPC = var3.readInt();
+        if (startPC < 0 || startPC >= var1) {
+            throw new FormatException("startPC out of code area");
         }
+        code = new byte[var1];
+        var3.read(code, 0, var1);
     }
 
     static int alloc(int var0) throws VMException {
