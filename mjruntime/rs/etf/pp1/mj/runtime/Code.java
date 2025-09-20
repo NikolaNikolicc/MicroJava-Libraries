@@ -17,7 +17,11 @@ public class Code {
   public static int pc = 0,      // tekuca adresa za smestanje prevedene instrukcije 
                     mainPc=-1,   // adresa main rutine
                     dataSize=0;  // velicina oblasti globalnih podataka
-  public static boolean greska=false; // flag da li je prijavljena neka  greske  
+  public static boolean greska=false; // flag da li je prijavljena neka  greske 
+  
+  public static String moduleName = "";
+  public static ModuleDataStructure moduleMap;
+
   public static final int		// instruction codes
 	load        =  1,
 	load_n      =  2,
@@ -177,24 +181,7 @@ public class Code {
       default:
         error("Greska: Na levoj strani dodele mora biti promenljiva!");
     }
-  }
-
-  // cuva kontekst trenutnog modula u njegovom objektu
-  public static void saveContext(Module oldModule) {
-    oldModule.setCode(Run.code);
-    oldModule.setData(Run.data);
-    oldModule.setMainPC(Run.startPC);
-    oldModule.setDataSize(Run.dataSize);
-  }
-
-  // postavlja kontekst novog modula u Run
-  public static void restoreContext(Module newModule) {
-    Run.code = newModule.getCode();
-    Run.data = newModule.getData();
-    Run.startPC = newModule.getMainPC();
-    Run.dataSize = newModule.getDataSize();
-  }
-  
+  }  
   
   //generisanje bezuslovnog skoka na adr
   public static void putJump (int adr) {
@@ -208,62 +195,43 @@ public class Code {
   public static void fixup (int patchAdr) {
 	  put2(patchAdr, (pc-patchAdr + 1));
   }
-  
-  // Writes the code buffer to the output stream
-	// public static void write(OutputStream s) {
-	// 	int codeSize;
-	// 	try {
-	// 		codeSize = pc;
-	// 		put('M'); put('J');
-	// 		put4(codeSize);
-	// 		put4(dataSize);
-	// 		put4(mainPc);
-	// 		s.write(buf, codeSize, pc - codeSize);	// header
-	// 		s.write(buf, 0, codeSize);				// code
-	// 		s.close();
-	// 	} catch(IOException e) {
-	// 		 error("Greska pri upisu u izlazni fajl");
-	// 	}
-	// }
 
-    public static void putString(String s, int terminator) {
-        for (int i = 0; i < s.length(); i++) {
-            put((int) s.charAt(i));
-        }
-        put(terminator);
+  public static void putString(String s, char terminator) {
+    for (int i = 0; i < s.length(); i++) {
+      put(s.charAt(i));
     }
+    put(terminator);
+  }
 
-    public static void putModuleMap() {
-    for (Module m : moduleMap.modules()) {
-        String name = m.getName();
-        int index = m.getIndex();
-
-        putString(name, -1);   // upiši ime sa terminatorom -1
-        put4(index);       // upiši indeks kao 4B
+  public static void putModuleMap() {
+    if (moduleMap != null) {
+      for (Module m : moduleMap.modules()) {
+          String name = m.getName();
+          int index = m.getIndex();
+          putString(name, Run.delimiter1); 
+          put4(index);
       }
-      put(-2); // kraj mape
     }
+    put(Run.delimiter2); 
+  }
 
-    public static String moduleName = "";
-    public static ModuleDataStructure moduleMap;
-
-  	public static void write(OutputStream s) {
-		int codeSize;
-		try {
-			codeSize = pc;
-			put('M'); put('J');
-			put4(codeSize);
-			put4(dataSize);
-			put4(mainPc);
-      // long ts = System.currentTimeMillis() / 1000L;
-      // put4((int) ts);    // timestamp
-      // putString(moduleName, -2);   // module name
-      // putModuleMap();    // module map
-			s.write(buf, codeSize, pc - codeSize);	// header
-			s.write(buf, 0, codeSize);				// code
-			s.close();
-		} catch(IOException e) {
-			 error("Greska pri upisu u izlazni fajl");
-		}
+  public static void write(OutputStream s) {
+    int codeSize;
+    try {
+      codeSize = pc;
+      put('M'); put('J');
+      put4(codeSize);
+      put4(dataSize);
+      put4(mainPc);
+      long ts = System.currentTimeMillis() / 1000L;
+      put4((int) ts);    // timestamp
+      putString(moduleName, Run.delimiter2);   // module name
+      putModuleMap();    // module map
+      s.write(buf, codeSize, pc - codeSize);	// header
+      s.write(buf, 0, codeSize);				// code
+      s.close();
+    } catch(IOException e) {
+        error("Greska pri upisu u izlazni fajl");
+    }
 	}
 }

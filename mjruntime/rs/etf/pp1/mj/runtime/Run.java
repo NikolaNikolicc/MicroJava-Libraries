@@ -90,6 +90,9 @@ public class Run {
     static final int ge = 5;
     static String[] opcode = new String[]{"???        ", "load       ", "load_0     ", "load_1     ", "load_2     ", "load_3     ", "store      ", "store_0    ", "store_1    ", "store_2    ", "store_3    ", "getstatic  ", "putstatic  ", "getfield   ", "putfield   ", "const_0    ", "const_1    ", "const_2    ", "const_3    ", "const_4    ", "const_5    ", "const_m1   ", "const      ", "add        ", "sub        ", "mul        ", "div        ", "rem        ", "neg        ", "shl        ", "shr        ", "inc        ", "new        ", "newarray   ", "aload      ", "astore     ", "baload     ", "bastore    ", "arraylength", "pop        ", "dup        ", "dup2       ", "jmp        ", "jeq        ", "jne        ", "jlt        ", "jle        ", "jgt        ", "jge        ", "call       ", "return     ", "enter      ", "exit       ", "read       ", "print      ", "bread      ", "bprint     ", "trap       ", "invokevirtual", "dup_x1     ", "dup_x2     "};
 
+    static final char delimiter1 = '{';
+    static final char delimiter2 = '}';
+
     public Run() {
     }
 
@@ -170,6 +173,32 @@ public class Run {
         startPC = var3.readInt();
         if (startPC < 0 || startPC >= var1) {
             throw new FormatException("startPC out of code area");
+        }
+        int timestamp = var3.readInt();
+        System.out.println("Timestamp: " + timestamp);
+        StringBuilder moduleNameBuilder = new StringBuilder();
+        
+        byte[] c = new byte[1];
+        var3.read(c);
+        while (c[0] != delimiter2) {
+            moduleNameBuilder.append((char)c[0]);
+            var3.read(c);
+        }
+        String moduleName = moduleNameBuilder.toString();
+        System.out.println("Module name: " + moduleName + ", timestamp: " + timestamp);
+
+        var3.read(c);
+        while (true) {
+            StringBuilder entryNameBuilder = new StringBuilder();
+            while (c[0] != delimiter1 && c[0] != delimiter2) {
+                entryNameBuilder.append((char)c[0]);
+                var3.read(c);
+            }
+            String entryName = entryNameBuilder.toString();
+            if (c[0] == delimiter2) break;
+            int modIndex = var3.readInt();
+            System.out.println("  Entry: " + entryName + " -> " + modIndex);
+            var3.read(c);
         }
         code = new byte[var1];
         var3.read(code, 0, var1);
