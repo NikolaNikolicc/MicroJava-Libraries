@@ -9,9 +9,14 @@ import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import rs.etf.pp1.mj.runtime.concepts.Context;
 
 public class Run {
 
+    static Path outputFolderPath; // path to folder where .obj files are located
     static Context currContext;
 
     static boolean debug;
@@ -174,12 +179,12 @@ public class Run {
             throw new FormatException("dataSize < 0");
         } 
         context.setDataSize(dataSize);
-        currContext.startPC = var3.readInt();
-        if (currContext.startPC < 0 || currContext.startPC >= var1) {
+        context.startPC = var3.readInt();
+        if (context.startPC < 0 || context.startPC >= var1) {
             throw new FormatException("startPC out of code area");
         }
         // read timestamp
-        currContext.timestamp = var3.readInt();
+        context.timestamp = var3.readInt();
         // read module name
         StringBuilder moduleNameBuilder = new StringBuilder();
         byte[] c = new byte[1];
@@ -189,9 +194,11 @@ public class Run {
             var3.read(c);
         }
         // read module index
-        currContext.moduleIndex = var3.readInt();
-        currContext.moduleName = moduleNameBuilder.toString();
-        System.out.println("Module name: " + currContext.moduleName + ", index: " + currContext.moduleIndex + ", timestamp: " + currContext.timestamp);
+        context.moduleIndex = var3.readInt();
+        context.moduleName = moduleNameBuilder.toString();
+        System.out.println("Module name: " + context.moduleName + ", index: " + context.moduleIndex + ", timestamp: " + context.timestamp);
+        // add this context to context entries
+        context.addEntry(context.moduleIndex, context.moduleName);
         // read module map
         var3.read(c);
         while (true) {
@@ -203,12 +210,12 @@ public class Run {
             String entryName = entryNameBuilder.toString();
             if (c[0] == delimiter2) break;
             int modIndex = var3.readInt();
-            currContext.addEntry(modIndex, entryName);
+            context.addEntry(modIndex, entryName);
             System.out.println("  Entry: " + entryName + " -> " + modIndex);
             var3.read(c);
         }
-        currContext.code = new byte[var1];
-        var3.read(currContext.code, 0, var1);
+        context.code = new byte[var1];
+        var3.read(context.code, 0, var1);
     }
 
     static int alloc(int var0) throws VMException {
@@ -679,6 +686,30 @@ public class Run {
         }
     }
 
+    private static String filterModuleName (String moduleName) {
+        int lastDotIndex = moduleName.lastIndexOf('.');
+        if (lastDotIndex == -1) {
+            return moduleName;
+        }
+        return moduleName.substring(lastDotIndex + 1);
+    }
+
+    private static void addAllTransitiveModulesContextsFromCurrentContext() {
+        for (String moduleName : currContext.getModuleNames()) {
+            // load Context from .obj file
+            Context moduleContext = new Context();
+            String name = filterModuleName(moduleName);
+            String fullName = outputFolderPath.resolve(name + ".obj").toString();
+            System.out.println("Loading module: " + fullName);
+            // try {
+            //     load(moduleContext, fullName);
+            // } catch (IOException | FormatException e) {
+            //     System.out.println("-- error loading module " + fullName + ": " + e.getMessage());
+            //     continue;
+            // }
+            // ContextHandler.getInstance().addEntry(moduleContext);
+        }
+    }
     public static void main(String[] var0) {
         String var1 = null;
         debug = false;
@@ -690,13 +721,15 @@ public class Run {
                 var1 = var0[var2];
             }
         }
-
         if (var1 == null) {
             System.out.println("Syntax: java ssw.mj.Run filename [-debug]");
         } else {
             try {
                 currContext = new Context();
+                outputFolderPath = Paths.get(var1).getParent();
                 load(currContext, var1);
+                ContextHandler.getInstance().addEntry(currContext);
+                addAllTransitiveModulesContextsFromCurrentContext();
                 heap = new int[100000];
                 // currContext.data = new int[dataSize];
                 stack = new int[30];

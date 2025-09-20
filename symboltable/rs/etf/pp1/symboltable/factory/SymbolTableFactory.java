@@ -20,5 +20,5 @@ public class SymbolTableFactory {
 	public ModuleDataStructure createModuleDataStructure() {
 		return new ModuleHashTableDataStructure();
 	}
-	
+
 }
