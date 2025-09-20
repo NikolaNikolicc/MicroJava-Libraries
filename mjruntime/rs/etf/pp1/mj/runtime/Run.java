@@ -696,6 +696,9 @@ public class Run {
 
     private static void addAllTransitiveModulesContextsFromCurrentContext() {
         for (String moduleName : currContext.getModuleNames()) {
+            if (moduleName.equals(currContext.moduleName)) {
+                continue; // skip loading the current module again
+            }
             // load Context from .obj file
             Context moduleContext = new Context();
             String name = filterModuleName(moduleName);
