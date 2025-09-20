@@ -1,7 +1,6 @@
 package rs.etf.pp1.mj.runtime;
 
 import java.io.*;
-import java.util.HashMap;
 
 import rs.etf.pp1.symboltable.Tab;
 import rs.etf.pp1.symboltable.concepts.Obj;
@@ -19,7 +18,7 @@ public class Code {
                     dataSize=0;  // velicina oblasti globalnih podataka
   public static boolean greska=false; // flag da li je prijavljena neka  greske 
   
-  public static String moduleName = "";
+  public static String moduleName = "noModule";
   public static int moduleIndex = -1;
   public static ModuleDataStructure moduleMap;
 
