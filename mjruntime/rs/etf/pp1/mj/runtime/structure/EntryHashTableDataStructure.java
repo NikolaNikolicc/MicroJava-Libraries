@@ -8,8 +8,10 @@ public class EntryHashTableDataStructure extends EntryDataStructure{
     public HashMap<Integer, String> hashTable = new HashMap<>();
 
     @Override
-    public void addEntry(int index, String name) {
+    public boolean addEntry(int index, String name) {
+        if (hashTable.containsKey(index)) return false;
         hashTable.put(index, name);
+        return true;
     }
 
     @Override

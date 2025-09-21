@@ -27,16 +27,11 @@ public class Context {
         data = new int[this.dataSize];
     }
 
-    public void addEntry(int index, String name) {
+    public void addEntryToEntryMap(int index, String name) {
         if (entryMap == null) {
             entryMap = RuntimeFactory.instance().createEntryDataStructure();
         }
         entryMap.addEntry(index, name);
-    }
-
-    public String resolveContextIndex(int index) {
-        if (entryMap == null) return null;
-        return entryMap.resolveContextIndex(index);
     }
 
     public Collection<String> getModuleNames() {

@@ -198,7 +198,7 @@ public class Run {
         context.moduleName = moduleNameBuilder.toString();
         System.out.println("Module name: " + context.moduleName + ", index: " + context.moduleIndex + ", timestamp: " + context.timestamp);
         // add this context to context entries
-        context.addEntry(context.moduleIndex, context.moduleName);
+        context.addEntryToEntryMap(context.moduleIndex, context.moduleName);
         // read module map
         var3.read(c);
         while (true) {
@@ -210,7 +210,7 @@ public class Run {
             String entryName = entryNameBuilder.toString();
             if (c[0] == delimiter2) break;
             int modIndex = var3.readInt();
-            context.addEntry(modIndex, entryName);
+            context.addEntryToEntryMap(modIndex, entryName);
             System.out.println("  Entry: " + entryName + " -> " + modIndex);
             var3.read(c);
         }
@@ -710,7 +710,7 @@ public class Run {
             //     System.out.println("-- error loading module " + fullName + ": " + e.getMessage());
             //     continue;
             // }
-            // ContextHandler.getInstance().addEntry(moduleContext);
+            // ContextHandler.getInstance().addEntryToContextMap(moduleContext);
         }
     }
     public static void main(String[] var0) {
@@ -731,7 +731,7 @@ public class Run {
                 currContext = new Context();
                 outputFolderPath = Paths.get(var1).getParent();
                 load(currContext, var1);
-                ContextHandler.getInstance().addEntry(currContext); // add main module context to its context map
+                currContext.addEntryToEntryMap(currContext.moduleIndex, currContext.moduleName); // add main module context to its context map
                 ContextHandler.getInstance().setEntryMap(currContext.getEntryMap()); // set global entry map for resolving context indexes
                 addAllTransitiveModulesContextsFromCurrentContext();
                 heap = new int[100000];
