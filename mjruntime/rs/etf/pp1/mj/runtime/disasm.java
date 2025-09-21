@@ -111,6 +111,32 @@ public class disasm {
 		}
 	}
 
+	public static void readModuleNameAndIndex() {
+		StringBuilder moduleNameBuilder = new StringBuilder();
+		int c = get();
+		while ((char) c != Run.delimiter1) {
+			moduleNameBuilder.append((char) c);
+			c = get();
+		}
+		System.out.println("moduleName=" + moduleNameBuilder.toString() + " (moduleIndex=" + get4() + ")");
+	}
+
+	public static void readModuleMap() {
+		int c = get();
+		while (true) {
+			StringBuilder entryNameBuilder = new StringBuilder();
+			while ((char) c != Run.delimiter1 && (char) c != Run.delimiter2) {
+				entryNameBuilder.append((char) c);
+				c = get();
+			}
+			if ((char) c == Run.delimiter2) {
+				break;
+			}
+			System.out.println("moduleMap entry: " + entryNameBuilder.toString() + " -> " + get4());
+			c = get();
+		}
+	}
+
 	public static void main(String[] arg) {
 		if (arg.length == 0)
 			System.out.println("-- no filename specified");
@@ -125,29 +151,8 @@ public class disasm {
 				    System.out.println("dataSize="+get4());
 				    System.out.println("mainPC="+get4());
 					System.out.println("timestamp="+get4());
-					// read module name
-					StringBuilder moduleNameBuilder = new StringBuilder();
-					int c = get();
-					while ((char) c != Run.delimiter1) {
-						moduleNameBuilder.append((char) c);
-						c = get();
-					}
-					System.out.println("moduleName=" + moduleNameBuilder.toString() + " (moduleIndex=" + get4() + ")");
-					// read module map
-					c = get();
-					while (true) {
-						StringBuilder entryNameBuilder = new StringBuilder();
-						while ((char) c != Run.delimiter1 && (char) c != Run.delimiter2) {
-							entryNameBuilder.append((char) c);
-							c = get();
-						}
-						if ((char) c == Run.delimiter2) {
-							break;
-						}
-						System.out.println("moduleMap entry: " + entryNameBuilder.toString() + " -> " + get4());
-						c = get();
-					}
-					// read code
+					readModuleNameAndIndex();
+					readModuleMap();
 				    off=cur;
 				    decode(code, len);
                 s.close();
