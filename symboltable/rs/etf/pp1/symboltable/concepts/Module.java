@@ -14,19 +14,12 @@ public class Module {
     private String name;
     private int index;
 
-    // -----------------------------SEMANTIC ANALYSIS-------------------------------------
     // list of imported modules
     private ModuleDataStructure importedModules;
     // list of single names that import this module, we are imitating Scope locals behavior because we must initialize our specific list
     private SymbolDataStructure importedNames;
     // list of local symbols (Obj) declared in this module (including formal parameters and local variables), we are imitating Obj locals behavior because we don't need to initialize our list, reference will do the job
     private SymbolDataStructure locals;
-
-    // ----------------------------------CODE GEN----------------------------------------
-    private byte code[];
-    private int data[];
-    private int mainPC;
-    private int dataSize;
 
     // constructors
     public Module(String name, int index) {
@@ -53,38 +46,6 @@ public class Module {
 
     public Collection<Obj> getLocals() {
         return (locals != null) ? locals.symbols() : Collections.emptyList();
-    }
-
-    public byte[] getCode() {
-        return code;
-    }
-
-    public void setCode(byte[] code) {
-        this.code = code;
-    }
-
-    public int[] getData() {
-        return data;
-    }
-
-    public void setData(int[] data) {
-        this.data = data;
-    }
-
-    public int getMainPC() {
-        return mainPC;
-    }
-
-    public void setMainPC(int mainPC) {
-        this.mainPC = mainPC;
-    }
-
-    public int getDataSize() {
-        return dataSize;
-    }
-
-    public void setDataSize(int dataSize) {
-        this.dataSize = dataSize;
     }
 
     // print method
