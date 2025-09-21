@@ -731,7 +731,8 @@ public class Run {
                 currContext = new Context();
                 outputFolderPath = Paths.get(var1).getParent();
                 load(currContext, var1);
-                ContextHandler.getInstance().addEntry(currContext);
+                ContextHandler.getInstance().addEntry(currContext); // add main module context to its context map
+                ContextHandler.getInstance().setEntryMap(currContext.getEntryMap()); // set global entry map for resolving context indexes
                 addAllTransitiveModulesContextsFromCurrentContext();
                 heap = new int[100000];
                 // currContext.data = new int[dataSize];

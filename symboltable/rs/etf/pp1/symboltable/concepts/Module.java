@@ -13,7 +13,6 @@ public class Module {
 
     private String name;
     private int index;
-
     // list of imported modules
     private ModuleDataStructure importedModules;
     // list of single names that import this module, we are imitating Scope locals behavior because we must initialize our specific list

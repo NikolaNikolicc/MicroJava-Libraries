@@ -2,7 +2,9 @@ package rs.etf.pp1.mj.runtime.concepts;
 
 import java.util.Collection;
 import java.util.Collections;
-import java.util.HashMap;
+
+import rs.etf.pp1.mj.runtime.factory.RuntimeFactory;
+import rs.etf.pp1.mj.runtime.structure.EntryDataStructure;
 
 public class Context {
     public byte[] code;
@@ -14,7 +16,7 @@ public class Context {
     public int timestamp;
     public String moduleName;
     public int moduleIndex;
-    public HashMap<Integer, String> entryMap;
+    private  EntryDataStructure entryMap;
 
     public String getModuleName() {
         return moduleName;
@@ -27,17 +29,21 @@ public class Context {
 
     public void addEntry(int index, String name) {
         if (entryMap == null) {
-            entryMap = new HashMap<>();
+            entryMap = RuntimeFactory.instance().createEntryDataStructure();
         }
-        entryMap.put(index, name);
+        entryMap.addEntry(index, name);
     }
 
     public String resolveContextIndex(int index) {
         if (entryMap == null) return null;
-        return entryMap.get(index);
+        return entryMap.resolveContextIndex(index);
     }
 
     public Collection<String> getModuleNames() {
-        return entryMap != null ? entryMap.values() : Collections.emptyList();
+        return entryMap != null ? entryMap.getModuleNames() : Collections.emptyList();
+    }
+
+    public EntryDataStructure getEntryMap() {
+        return entryMap;
     }
 }
