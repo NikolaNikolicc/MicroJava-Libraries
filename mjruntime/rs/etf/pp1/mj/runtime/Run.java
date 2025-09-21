@@ -18,6 +18,7 @@ public class Run {
 
     static Path outputFolderPath; // path to folder where .obj files are located
     static Context currContext;
+    static ContextHandler contextHandler = ContextHandler.getInstance();
 
     static boolean debug;
     // static byte[] code;
@@ -321,10 +322,18 @@ public class Run {
                         local[fp + var0] = pop();
                         break;
                     case 11:
-                        push(currContext.data[next2(true)]);
+                        int var69 = next2(true);
+                        int var70 = next(true); // new module index
+                        if (var70 != currContext.moduleIndex) contextHandler.switchContext(var70);
+                        push(currContext.data[var69]);
+                        if (var70 != currContext.moduleIndex) contextHandler.restoreContext();
                         break;
                     case 12:
-                        currContext.data[next2(true)] = pop();
+                        int var71 = next2(true);
+                        int var72 = next(true); // new module index
+                        if (var72 != currContext.moduleIndex) contextHandler.switchContext(var72);
+                        currContext.data[var71] = pop();
+                        if (var72 != currContext.moduleIndex) contextHandler.restoreContext();
                         break;
                     case 13:
                         int var31 = pop();

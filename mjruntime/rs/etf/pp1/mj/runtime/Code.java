@@ -118,7 +118,7 @@ public class Code {
         
       case Obj.Var:
         if (o.getLevel()==0) { // global variable 
-            put(getstatic); put2(o.getAdr()); 
+            put(getstatic); put2(o.getAdr()); put(o.getModule().getIndex());
         	  break; 
         }
         // local variable
@@ -158,7 +158,7 @@ public class Code {
 
       case Obj.Var:
         if (o.getLevel()==0) { // global variable 
-            put(putstatic); put2(o.getAdr()); 
+            put(putstatic); put2(o.getAdr()); put(o.getModule().getIndex());
             break;
         }
         // local variable 

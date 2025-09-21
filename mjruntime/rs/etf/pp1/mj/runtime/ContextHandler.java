@@ -10,6 +10,7 @@ public class ContextHandler {
     private static ContextHandler instance;
     private EntryDataStructure entryMap;
     private ContextDataStructure contextMap;
+    private int currentContextIndex = -1;
 
     private ContextHandler() {
         
@@ -38,15 +39,20 @@ public class ContextHandler {
         return entryMap.resolveContextIndex(index);
     }
 
-    private boolean switchContext(String newContextName) {
+    private boolean switchContextHelper(String newContextName) {
         if (contextMap == null || contextMap.searchKey(newContextName) == null) return false;
         Run.currContext = contextMap.searchKey(newContextName);
         return true;
     }
 
-    public boolean switchCurrentContext(int index) {
+    public boolean switchContext(int index) {
+        currentContextIndex = Run.currContext.moduleIndex;
         String contextName = resolveIndexToName(index);
         if (contextName == null) return false;
-        return switchContext(contextName);
+        return switchContextHelper(contextName);
+    }
+
+    public boolean restoreContext() {
+        return switchContext(currentContextIndex);
     }
 }
