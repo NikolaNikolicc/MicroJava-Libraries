@@ -196,7 +196,6 @@ public class Run {
         // read module index
         context.moduleIndex = var3.readInt();
         context.moduleName = moduleNameBuilder.toString();
-        System.out.println("Module name: " + context.moduleName + ", index: " + context.moduleIndex + ", timestamp: " + context.timestamp);
         // add this context to context entries
         context.addEntryToEntryMap(context.moduleIndex, context.moduleName);
         // read module map
@@ -211,7 +210,6 @@ public class Run {
             if (c[0] == delimiter2) break;
             int modIndex = var3.readInt();
             context.addEntryToEntryMap(modIndex, entryName);
-            System.out.println("  Entry: " + entryName + " -> " + modIndex);
             var3.read(c);
         }
         context.code = new byte[var1];
