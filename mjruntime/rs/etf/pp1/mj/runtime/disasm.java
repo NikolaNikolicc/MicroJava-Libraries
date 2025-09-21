@@ -51,8 +51,8 @@ public class disasm {
 				case 8: {P("store_1"); break;}
 				case 9: {P("store_2"); break;}
 				case 10: {P("store_3"); break;}
-				case 11: {P("getstatic "+get2()); break;}
-				case 12: {P("putstatic "+get2()); break;}
+				case 11: {P("getstatic "+get2()+" "+get()); break;}
+				case 12: {P("putstatic "+get2()+" "+get()); break;}
 				case 13: {P("getfield "+get2()); break;}
 				case 14: {P("putfield "+get2()); break;}
 				case 15: {P("const_0"); break;}
