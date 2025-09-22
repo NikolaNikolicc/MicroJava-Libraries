@@ -3,6 +3,11 @@
 */
 package rs.etf.pp1.mj.runtime;
 import java.io.*;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
+import rs.etf.pp1.mj.runtime.factory.RuntimeFactory;
+import rs.etf.pp1.mj.runtime.structure.EntryDataStructure;
 
 public class disasm {
 
@@ -28,6 +33,10 @@ public class disasm {
 		int abs = adr + dist;
 		return String.valueOf(dist)+" (="+String.valueOf(abs)+")";
 	}
+
+	private static String switchModule() {
+		return " ["+String.valueOf(get()) + "]";
+	}
 	
 	private static void P(String s) {
 		System.out.println(adr+": "+s);
@@ -51,8 +60,8 @@ public class disasm {
 				case 8: {P("store_1"); break;}
 				case 9: {P("store_2"); break;}
 				case 10: {P("store_3"); break;}
-				case 11: {P("getstatic "+get2()+" "+get()); break;}
-				case 12: {P("putstatic "+get2()+" "+get()); break;}
+				case 11: {P("getstatic "+get2()+switchModule()); break;}
+				case 12: {P("putstatic "+get2()+switchModule()); break;}
 				case 13: {P("getfield "+get2()); break;}
 				case 14: {P("putfield "+get2()); break;}
 				case 15: {P("const_0"); break;}
@@ -89,7 +98,7 @@ public class disasm {
 				case 46: {P("jle "+jumpDist()); break;}
 				case 47: {P("jgt "+jumpDist()); break;}
 				case 48: {P("jge "+jumpDist()); break;}
-				case 49: {P("call "+jumpDist()); break;}
+				case 49: {P("call "+jumpDist()+switchModule()); break;}
 				case 50: {P("return"); break;}
 				case 51: {P("enter "+get()+" "+get()); break;}
 				case 52: {P("exit"); break;}
@@ -111,7 +120,16 @@ public class disasm {
 		}
 	}
 
-	public static void readModuleNameAndIndex() {
+	private static EntryDataStructure entryMap;
+
+	private static void addEntryToEntryMap(int index, String name) {
+		if (entryMap == null) {
+			entryMap = RuntimeFactory.instance().createEntryDataStructure();
+		}
+		entryMap.addEntry(index, name);
+	}
+
+	private static void readModuleNameAndIndex() {
 		StringBuilder moduleNameBuilder = new StringBuilder();
 		int c = get();
 		while ((char) c != Run.delimiter1) {
@@ -121,7 +139,7 @@ public class disasm {
 		System.out.println("moduleName=" + moduleNameBuilder.toString() + " (moduleIndex=" + get4() + ")");
 	}
 
-	public static void readModuleMap() {
+	private static void readModuleMap() {
 		int c = get();
 		while (true) {
 			StringBuilder entryNameBuilder = new StringBuilder();
@@ -132,34 +150,57 @@ public class disasm {
 			if ((char) c == Run.delimiter2) {
 				break;
 			}
-			System.out.println("moduleMap entry: " + entryNameBuilder.toString() + " -> " + get4());
+			int index = get4();
+			System.out.println("moduleMap entry: " + entryNameBuilder.toString() + " -> " + index);
+			addEntryToEntryMap(index, entryNameBuilder.toString());
 			c = get();
 		}
 	}
 
+	public static void readFile(String fileName) {
+		try {
+			InputStream s = new FileInputStream(fileName); 
+			System.out.println("\n--- disassembly of file " + fileName + " ---");
+			int len = s.read(code);
+			int first = get();
+			int second = get();
+			System.out.println("magic number: " + (char)first + (char)second);
+			if (first!='M' || second!='J')
+				System.out.println("-- invalid microjava object file");
+			else {
+				System.out.println("codeSize="+get4());
+				System.out.println("dataSize="+get4());
+				System.out.println("mainPC="+get4());
+				System.out.println("timestamp="+get4());
+				readModuleNameAndIndex();
+				readModuleMap();
+				off=cur;
+				decode(code, len);
+				s.close();
+			}
+		} catch (IOException e) {
+			System.out.println("-- could not open file " + fileName);
+		}
+	}
+
+	public static void readFileForAllImportedModules(Path parentPath) {
+		if (entryMap == null) return;
+
+		for (String moduleName : entryMap.getModuleNames()) {
+			Run.filterModuleName(moduleName);
+			String fileName = parentPath.resolve(moduleName + ".obj").toString();
+			cur = 0;
+			readFile(fileName);
+		}
+	}
+
+
 	public static void main(String[] arg) {
 		if (arg.length == 0)
-			System.out.println("-- no filename specified");
+			System.out.println("-- no main filename specified");
 		else {
-			try {
-				InputStream s = new FileInputStream(arg[0]); 
-				int len = s.read(code);
-				if (get()!='M' || get()!='J')
-				    System.out.println("-- invalid microjava object file");
-				else {
-				    System.out.println("codeSize="+get4());
-				    System.out.println("dataSize="+get4());
-				    System.out.println("mainPC="+get4());
-					System.out.println("timestamp="+get4());
-					readModuleNameAndIndex();
-					readModuleMap();
-				    off=cur;
-				    decode(code, len);
-                s.close();
-			  }
-			} catch (IOException e) {
-				System.out.println("-- could not open file " + arg[0]);
-			}
+			readFile(arg[0]);
+			readFileForAllImportedModules(Paths.get(arg[0]).getParent());
 		}
 	}
 

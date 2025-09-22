@@ -181,7 +181,8 @@ public class Run {
         } 
         context.setDataSize(dataSize);
         context.startPC = var3.readInt();
-        if (context.startPC < 0 || context.startPC >= var1) {
+        // validate startPC but only for 'main' context, not for other module contexts
+        if (context == currContext && (context.startPC < 0 || context.startPC >= var1)) {
             throw new FormatException("startPC out of code area");
         }
         // read timestamp
@@ -552,15 +553,24 @@ public class Run {
                         break;
                     case 49:
                         short var4 = next2(true);
+                        short var73 = next(true);
                         PUSH(pc);
+                        PUSH(currContext.moduleIndex);
+                        contextHandler.switchContext(var73);
+                        System.out.println("\nPRINT METHOD STACK\n");
+                        for (int i = 0; i < sp; i++) {
+                            System.out.print(local[i] + " ");
+                        }
                         pc += var4 - 3;
                         break;
                     case 50:
                         if (sp == 0) {
                             return;
                         }
-
+                        int oldIndex = POP();
+                        contextHandler.switchContext(oldIndex);
                         pc = POP();
+                        System.out.println("Returned to pc: " + pc);
                         break;
                     case 51:
                         byte var10 = next(true);
@@ -693,7 +703,7 @@ public class Run {
         }
     }
 
-    private static String filterModuleName (String moduleName) {
+    static String filterModuleName (String moduleName) {
         int lastDotIndex = moduleName.lastIndexOf('.');
         if (lastDotIndex == -1) {
             return moduleName;
@@ -711,13 +721,13 @@ public class Run {
             String name = filterModuleName(moduleName);
             String fullName = outputFolderPath.resolve(name + ".obj").toString();
             System.out.println("Loading module: " + fullName);
-            // try {
-            //     load(moduleContext, fullName);
-            // } catch (IOException | FormatException e) {
-            //     System.out.println("-- error loading module " + fullName + ": " + e.getMessage());
-            //     continue;
-            // }
-            // ContextHandler.getInstance().addEntryToContextMap(moduleContext);
+            try {
+                load(moduleContext, fullName);
+            } catch (IOException | FormatException e) {
+                System.out.println("-- error loading module " + fullName + ": " + e.getMessage());
+                continue;
+            }
+            contextHandler.addEntryToContextMap(moduleContext); // add loaded module context to context entries
         }
     }
     public static void main(String[] var0) {
@@ -738,7 +748,7 @@ public class Run {
                 currContext = new Context();
                 outputFolderPath = Paths.get(var1).getParent();
                 load(currContext, var1);
-                currContext.addEntryToEntryMap(currContext.moduleIndex, currContext.moduleName); // add main module context to its context map
+                contextHandler.addEntryToContextMap(currContext); // add main module context to context entries
                 ContextHandler.getInstance().setEntryMap(currContext.getEntryMap()); // set global entry map for resolving context indexes
                 addAllTransitiveModulesContextsFromCurrentContext();
                 heap = new int[100000];
