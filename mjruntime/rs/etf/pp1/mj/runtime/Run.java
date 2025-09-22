@@ -19,6 +19,7 @@ public class Run {
     static Path outputFolderPath; // path to folder where .obj files are located
     static Context currContext;
     static ContextHandler contextHandler = ContextHandler.getInstance();
+    static int oldIndex;
 
     static boolean debug;
     // static byte[] code;
@@ -325,16 +326,34 @@ public class Run {
                     case 11:
                         int var69 = next2(true);
                         int var70 = next(true); // new module index
-                        if (var70 != currContext.moduleIndex) contextHandler.switchContext(var70);
+                        oldIndex = currContext.moduleIndex;
+                        if (var70 != currContext.moduleIndex) {
+                            if (!contextHandler.switchContext(var70)) {
+                                throw new VMException("module context switch failed during getstatic");
+                            }
+                        }
                         push(currContext.data[var69]);
-                        if (var70 != currContext.moduleIndex) contextHandler.restoreContext();
+                        if (var70 != currContext.moduleIndex) {
+                            if (!contextHandler.switchContext(oldIndex)) {
+                                throw new VMException("module context restore failed during getstatic");
+                            }
+                        }
                         break;
                     case 12:
                         int var71 = next2(true);
                         int var72 = next(true); // new module index
-                        if (var72 != currContext.moduleIndex) contextHandler.switchContext(var72);
+                        oldIndex = currContext.moduleIndex;
+                        if (var72 != currContext.moduleIndex) {
+                            if (!contextHandler.switchContext(var72)) {
+                                throw new VMException("module context switch failed during putstatic");
+                            }
+                        }
                         currContext.data[var71] = pop();
-                        if (var72 != currContext.moduleIndex) contextHandler.restoreContext();
+                        if (var72 != currContext.moduleIndex) {
+                            if (!contextHandler.switchContext(oldIndex)) {
+                                throw new VMException("module context restore failed during putstatic");
+                            }
+                        }
                         break;
                     case 13:
                         int var31 = pop();
@@ -556,21 +575,21 @@ public class Run {
                         short var73 = next(true);
                         PUSH(pc);
                         PUSH(currContext.moduleIndex);
-                        contextHandler.switchContext(var73);
-                        System.out.println("\nPRINT METHOD STACK\n");
-                        for (int i = 0; i < sp; i++) {
-                            System.out.print(local[i] + " ");
+                        if (!contextHandler.switchContext(var73)) {
+                            throw new VMException("module context switch failed during call");
                         }
-                        pc += var4 - 3;
+                        pc += var4 - 4; // one byte for opcode 2 bytes for offset and one byte for module index
                         break;
                     case 50:
                         if (sp == 0) {
                             return;
                         }
-                        int oldIndex = POP();
-                        contextHandler.switchContext(oldIndex);
+                        oldIndex = POP();
+                        if (!contextHandler.switchContext(oldIndex)) {
+                            throw new VMException("module context switch failed during return");
+                        }
                         pc = POP();
-                        System.out.println("Returned to pc: " + pc);
+                        // System.out.println("Returned to pc: " + pc);
                         break;
                     case 51:
                         byte var10 = next(true);
