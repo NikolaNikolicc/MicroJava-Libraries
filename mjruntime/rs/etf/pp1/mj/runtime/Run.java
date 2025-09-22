@@ -327,32 +327,24 @@ public class Run {
                         int var69 = next2(true);
                         int var70 = next(true); // new module index
                         oldIndex = currContext.moduleIndex;
-                        if (var70 != currContext.moduleIndex) {
-                            if (!contextHandler.switchContext(var70)) {
-                                throw new VMException("module context switch failed during getstatic");
-                            }
+                        if (!contextHandler.switchContext(var70)) {
+                            throw new VMException("module context switch failed during getstatic");
                         }
                         push(currContext.data[var69]);
-                        if (var70 != currContext.moduleIndex) {
-                            if (!contextHandler.switchContext(oldIndex)) {
-                                throw new VMException("module context restore failed during getstatic");
-                            }
+                        if (!contextHandler.switchContext(oldIndex)) {
+                            throw new VMException("module context restore failed during getstatic");
                         }
                         break;
                     case 12:
                         int var71 = next2(true);
                         int var72 = next(true); // new module index
                         oldIndex = currContext.moduleIndex;
-                        if (var72 != currContext.moduleIndex) {
-                            if (!contextHandler.switchContext(var72)) {
-                                throw new VMException("module context switch failed during putstatic");
-                            }
+                        if (!contextHandler.switchContext(var72)) {
+                            throw new VMException("module context switch failed during putstatic");
                         }
                         currContext.data[var71] = pop();
-                        if (var72 != currContext.moduleIndex) {
-                            if (!contextHandler.switchContext(oldIndex)) {
-                                throw new VMException("module context restore failed during putstatic");
-                            }
+                        if (!contextHandler.switchContext(oldIndex)) {
+                            throw new VMException("module context restore failed during putstatic");
                         }
                         break;
                     case 13:
