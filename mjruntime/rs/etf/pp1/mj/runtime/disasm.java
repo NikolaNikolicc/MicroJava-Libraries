@@ -164,7 +164,6 @@ public class disasm {
 			int len = s.read(code);
 			int first = get();
 			int second = get();
-			System.out.println("magic number: " + (char)first + (char)second);
 			if (first!='M' || second!='J')
 				System.out.println("-- invalid microjava object file");
 			else {
