@@ -3,6 +3,7 @@ package rs.etf.pp1.symboltable.concepts;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import rs.etf.pp1.symboltable.ModuleHandler;
 import rs.etf.pp1.symboltable.Tab;
 import rs.etf.pp1.symboltable.structure.HashTableDataStructure;
 import rs.etf.pp1.symboltable.structure.SymbolDataStructure;
@@ -42,6 +43,9 @@ public class Struct {
 	// enum: referenca na hes tabelu u kojoj se nalaze konstante nabrajanja
 	private SymbolDataStructure members;
 
+	// indeks modula u kojem je definisan tip
+	private int currModuleIndex;
+
 	public void setElementType(Struct type) {
 		elemType = type;
 	}
@@ -57,18 +61,29 @@ public class Struct {
 		}
 	}
 	
+	private void setCurrModuleIndex() {
+		this.currModuleIndex = ModuleHandler.getInstance().getCurrentModule().getIndex();
+	}
+
 	public Struct(int kind) {
 		this.kind = kind;
+		setCurrModuleIndex();
 	}
 
 	public Struct(int kind, Struct elemType) {
 		this.kind = kind;
+		setCurrModuleIndex();
 		if (kind == Array) this.elemType = elemType;
 	}
 
 	public Struct(int kind, SymbolDataStructure members) {
 		this.kind = kind;
+		setCurrModuleIndex();
 		setMembers(members);
+	}
+
+	public int getCurrModuleIndex() {
+		return currModuleIndex;
 	}
 
 	public int getKind() {
