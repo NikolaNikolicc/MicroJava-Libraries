@@ -44,7 +44,7 @@ public class Struct {
 	private SymbolDataStructure members;
 
 	// indeks modula u kojem je definisan tip
-	private int currModuleIndex;
+	private int moduleIndex;
 
 	public void setElementType(Struct type) {
 		elemType = type;
@@ -60,30 +60,30 @@ public class Struct {
 			}
 		}
 	}
-	
-	private void setCurrModuleIndex() {
-		this.currModuleIndex = ModuleHandler.getInstance().getCurrentModule().getIndex();
+
+	private void setModuleIndex() {
+		this.moduleIndex = ModuleHandler.getInstance().getCurrentModule().getIndex();
 	}
 
 	public Struct(int kind) {
 		this.kind = kind;
-		setCurrModuleIndex();
+		setModuleIndex();
 	}
 
 	public Struct(int kind, Struct elemType) {
 		this.kind = kind;
-		setCurrModuleIndex();
+		setModuleIndex();
 		if (kind == Array) this.elemType = elemType;
 	}
 
 	public Struct(int kind, SymbolDataStructure members) {
 		this.kind = kind;
-		setCurrModuleIndex();
+		setModuleIndex();
 		setMembers(members);
 	}
 
-	public int getCurrModuleIndex() {
-		return currModuleIndex;
+	public int getModuleIndex() {
+		return moduleIndex;
 	}
 
 	public int getKind() {
