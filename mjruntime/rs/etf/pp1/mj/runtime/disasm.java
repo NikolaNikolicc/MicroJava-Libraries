@@ -107,10 +107,12 @@ public class disasm {
 				case 55: {P("bread"); break;}
 				case 56: {P("bprint"); break;}
 				case 57: {P("trap "+get()); break;}
-				case 58: { String name=new String(); 
+				case 58: { 
+							String name=new String(); 
+				            int moduleIndex=get();
 							int a=get4();
 							while (a!=-1) { name+=(char)a; a=get4(); }
-							P("invokevirtual "+name);
+							P("invokevirtual "+name+" ["+moduleIndex+"]");
 							break;
 						 }
 				case 59: {P("dup_x1"); break;}
