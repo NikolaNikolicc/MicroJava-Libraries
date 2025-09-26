@@ -77,7 +77,8 @@ public class Code {
 	trap        = 57,
 	invokevirtual = 58,
 	dup_x1      = 59,
-	dup_x2      = 60;
+	dup_x2      = 60,
+  module_switch = 61;
   public static int eq=0, ne=1, lt=2, le=3, gt=4, ge=5;
   public static int inverse[]={ne, eq, ge, gt, le, lt}; //  maps op to the inverse of top
   

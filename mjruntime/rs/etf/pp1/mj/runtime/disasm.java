@@ -116,7 +116,8 @@ public class disasm {
 							break;
 						 }
 				case 59: {P("dup_x1"); break;}
-				case 60: {P("dup_x2"); break;}						 
+				case 60: {P("dup_x2"); break;}
+				case 61: {P("module_switch "+switchModule()); break;}						 
 				default: {P("-- error--"); break;}
 			}
 		}

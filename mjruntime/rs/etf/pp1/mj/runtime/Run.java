@@ -92,13 +92,14 @@ public class Run {
     static final int invokevirtual = 58;
     static final int dup_x1 = 59;
     static final int dup_x2 = 60;
+    static final int module_switch = 61;
     static final int eq = 0;
     static final int ne = 1;
     static final int lt = 2;
     static final int le = 3;
     static final int gt = 4;
     static final int ge = 5;
-    static String[] opcode = new String[]{"???        ", "load       ", "load_0     ", "load_1     ", "load_2     ", "load_3     ", "store      ", "store_0    ", "store_1    ", "store_2    ", "store_3    ", "getstatic  ", "putstatic  ", "getfield   ", "putfield   ", "const_0    ", "const_1    ", "const_2    ", "const_3    ", "const_4    ", "const_5    ", "const_m1   ", "const      ", "add        ", "sub        ", "mul        ", "div        ", "rem        ", "neg        ", "shl        ", "shr        ", "inc        ", "new        ", "newarray   ", "aload      ", "astore     ", "baload     ", "bastore    ", "arraylength", "pop        ", "dup        ", "dup2       ", "jmp        ", "jeq        ", "jne        ", "jlt        ", "jle        ", "jgt        ", "jge        ", "call       ", "return     ", "enter      ", "exit       ", "read       ", "print      ", "bread      ", "bprint     ", "trap       ", "invokevirtual", "dup_x1     ", "dup_x2     "};
+    static String[] opcode = new String[]{"???        ", "load       ", "load_0     ", "load_1     ", "load_2     ", "load_3     ", "store      ", "store_0    ", "store_1    ", "store_2    ", "store_3    ", "getstatic  ", "putstatic  ", "getfield   ", "putfield   ", "const_0    ", "const_1    ", "const_2    ", "const_3    ", "const_4    ", "const_5    ", "const_m1   ", "const      ", "add        ", "sub        ", "mul        ", "div        ", "rem        ", "neg        ", "shl        ", "shr        ", "inc        ", "new        ", "newarray   ", "aload      ", "astore     ", "baload     ", "bastore    ", "arraylength", "pop        ", "dup        ", "dup2       ", "jmp        ", "jeq        ", "jne        ", "jlt        ", "jle        ", "jgt        ", "jge        ", "call       ", "return     ", "enter      ", "exit       ", "read       ", "print      ", "bread      ", "bprint     ", "trap       ", "invokevirtual", "dup_x1     ", "dup_x2     ", "module_switch"};
 
     static final char delimiter1 = '{';
     static final char delimiter2 = '}';
@@ -708,6 +709,14 @@ public class Run {
                         push(var8);
                         push(var3);
                         push(var2);
+                        break;
+                    case 61:
+                        System.out.print(" ");
+                        int var58 = next(true); // new module index
+                        oldIndex = currContext.moduleIndex;
+                        if (!contextHandler.switchContext(var58)) {
+                            throw new VMException("module context switch failed during module_switch");
+                        }
                         break;
                     default:
                         throw new VMException("wrong opcode " + var0);
