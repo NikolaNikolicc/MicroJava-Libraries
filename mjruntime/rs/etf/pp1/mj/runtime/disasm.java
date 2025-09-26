@@ -188,8 +188,8 @@ public class disasm {
 		if (entryMap == null) return;
 
 		for (String moduleName : entryMap.getModuleNames()) {
-			Run.filterModuleName(moduleName);
-			String fileName = parentPath.resolve(moduleName + ".obj").toString();
+			String parsedName = Run.filterModuleName(moduleName);
+			String fileName = parentPath.resolve(parsedName + ".obj").toString();
 			cur = 0;
 			readFile(fileName);
 		}
