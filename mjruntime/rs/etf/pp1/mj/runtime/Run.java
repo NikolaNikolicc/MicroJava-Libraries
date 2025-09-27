@@ -655,18 +655,13 @@ public class Run {
                     case 57:
                         throw new VMException("trap(" + next(true) + ")");
                     case 58:
-                        int var75 = next(true); // tvf module index
-                        // oldIndex = currContext.moduleIndex;
-                        // if (!contextHandler.switchContext(var75)) {
-                        //     throw new VMException("module context switch failed during invokevirtual");
-                        // }
                         int var12 = pc;
                         int var13 = 0;
                         int var74 = 0;
                         boolean var14 = false;
                         int var15 = -1;
-                        int var1 = pop();
-                        System.out.println("Looking for method address " + var1 + " in module " + var75);
+                        int var75 = pop(); // tvf module index
+                        int var1 = pop(); // tvf table address
                         for(int var33 = readCode(var75, var1++); var33 != -2; var33 = readCode(var75, var1++)) {
                             var15 = next4();
                             if (var15 != var33 || var15 == -1) {
