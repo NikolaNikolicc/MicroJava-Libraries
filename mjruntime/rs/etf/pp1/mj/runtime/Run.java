@@ -274,7 +274,7 @@ public class Run {
 
     static void printInstr() {
         byte var0 = currContext.code[pc - 1];
-        String var1 = var0 > 0 && var0 <= 58 ? opcode[var0] : opcode[0];
+        String var1 = var0 > 0 && var0 < opcode.length ? opcode[var0] : opcode[0];
         printNum(pc - 1, 5);
         System.out.print(": " + var1 + " ");
     }
@@ -285,6 +285,19 @@ public class Run {
         }
 
         System.out.println();
+    }
+
+    // read one static address from given context from given address
+    static int readCode(int contextIndex, int address) {
+        // save current context index
+        oldIndex = currContext.moduleIndex;
+        // context switch
+        contextHandler.switchContext(contextIndex);
+        // read address
+        int value = currContext.data[address];
+        // context switch back
+        contextHandler.switchContext(oldIndex);
+        return value;
     }
 
     static void interpret() {
@@ -642,44 +655,43 @@ public class Run {
                     case 57:
                         throw new VMException("trap(" + next(true) + ")");
                     case 58:
-                        int var75 = next(false); // tvf module index
-                        oldIndex = currContext.moduleIndex;
-                        if (!contextHandler.switchContext(var75)) {
-                            throw new VMException("module context switch failed during invokevirtual");
-                        }
+                        int var75 = next(true); // tvf module index
+                        // oldIndex = currContext.moduleIndex;
+                        // if (!contextHandler.switchContext(var75)) {
+                        //     throw new VMException("module context switch failed during invokevirtual");
+                        // }
                         int var12 = pc;
                         int var13 = 0;
                         int var74 = 0;
                         boolean var14 = false;
                         int var15 = -1;
                         int var1 = pop();
-
-                        for(int var33 = currContext.data[var1++]; var33 != -2; var33 = currContext.data[var1++]) {
+                        System.out.println("Looking for method address " + var1 + " in module " + var75);
+                        for(int var33 = readCode(var75, var1++); var33 != -2; var33 = readCode(var75, var1++)) {
                             var15 = next4();
                             if (var15 != var33 || var15 == -1) {
                                 if (var15 == -1 && var33 == -1) {
-                                    var13 = currContext.data[var1++]; // method address
-                                    var74 = currContext.data[var1]; // module index
+                                    var13 = readCode(var75, var1++); // method address
+                                    var74 = readCode(var75, var1); // module index
                                     var14 = true;
                                     break;
                                 }
 
                                 if (var15 == -1 && var33 != -1) {
-                                    for(pc = var12; var33 != -1; var33 = currContext.data[var1++]) {
+                                    for(pc = var12; var33 != -1; var33 = readCode(var75, var1++)) {
                                     }
                                     ++var1; // skip -1
                                     ++var1; // skip module index
-                                    int var67 = currContext.data[var1];
+                                    int var67 = readCode(var75, var1);
                                 } else {
-                                    for(pc = var12; var33 != -1; var33 = currContext.data[var1++]) {
+                                    for(pc = var12; var33 != -1; var33 = readCode(var75, var1++)) {
                                     }
                                     ++var1; // skip -1
                                     ++var1; // skip module index
-                                    int var10000 = currContext.data[var1];
+                                    int var10000 = readCode(var75, var1);
                                 }
                             }
                         }
-
                         if (!var14) {
                             while(var15 != -1) {
                                 var15 = next4();
@@ -688,7 +700,7 @@ public class Run {
                         }
 
                         PUSH(pc);
-                        PUSH(oldIndex);
+                        PUSH(currContext.moduleIndex);
                         if (!contextHandler.switchContext(var74)) {
                             throw new VMException("module context switch failed during invokevirtual");
                         }

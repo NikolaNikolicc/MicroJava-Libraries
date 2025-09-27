@@ -41,7 +41,7 @@ public class ContextHandler {
     private boolean switchContextHelper(String newContextName) {
         if (contextMap == null || contextMap.searchKey(newContextName) == null) return false;
         Run.currContext = contextMap.searchKey(newContextName);
-        if (Run.debug) System.out.println("\nSwitched context to: " + Run.currContext.moduleName);
+        if (Run.debug) System.out.println("\nSwitched context to module: " + Run.currContext.moduleName);
         return true;
     }
 
