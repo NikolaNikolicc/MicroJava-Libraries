@@ -22,13 +22,9 @@ public class Run {
     static int oldIndex;
 
     static boolean debug;
-    // static byte[] code;
-    // static int[] data;
     static int[] heap;
     static int[] stack;
     static int[] local;
-    // static int dataSize;
-    // static int startPC;
     static int pc;
     static int fp;
     static int sp;
@@ -341,25 +337,17 @@ public class Run {
                         int var69 = next2(true);
                         int var70 = next(true); // new module index
                         oldIndex = currContext.moduleIndex;
-                        if (!contextHandler.switchContext(var70)) {
-                            throw new VMException("module context switch failed during getstatic");
-                        }
+                        contextHandler.switchContext(var70);
                         push(currContext.data[var69]);
-                        if (!contextHandler.switchContext(oldIndex)) {
-                            throw new VMException("module context restore failed during getstatic");
-                        }
+                        contextHandler.switchContext(oldIndex);
                         break;
                     case 12:
                         int var71 = next2(true);
                         int var72 = next(true); // new module index
                         oldIndex = currContext.moduleIndex;
-                        if (!contextHandler.switchContext(var72)) {
-                            throw new VMException("module context switch failed during putstatic");
-                        }
+                        contextHandler.switchContext(var72);
                         currContext.data[var71] = pop();
-                        if (!contextHandler.switchContext(oldIndex)) {
-                            throw new VMException("module context restore failed during putstatic");
-                        }
+                        contextHandler.switchContext(oldIndex);
                         break;
                     case 13:
                         int var31 = pop();
@@ -581,9 +569,7 @@ public class Run {
                         short var73 = next(true);
                         PUSH(pc);
                         PUSH(currContext.moduleIndex);
-                        if (!contextHandler.switchContext(var73)) {
-                            throw new VMException("module context switch failed during call");
-                        }
+                        contextHandler.switchContext(var73);
                         pc += var4 - 4; // one byte for opcode 2 bytes for offset and one byte for module index
                         break;
                     case 50:
@@ -591,11 +577,8 @@ public class Run {
                             return;
                         }
                         oldIndex = POP();
-                        if (!contextHandler.switchContext(oldIndex)) {
-                            throw new VMException("module context switch failed during return");
-                        }
+                        contextHandler.switchContext(oldIndex);
                         pc = POP();
-                        // System.out.println("Returned to pc: " + pc);
                         break;
                     case 51:
                         byte var10 = next(true);
@@ -696,9 +679,7 @@ public class Run {
 
                         PUSH(pc);
                         PUSH(currContext.moduleIndex);
-                        if (!contextHandler.switchContext(var74)) {
-                            throw new VMException("module context switch failed during invokevirtual");
-                        }
+                        contextHandler.switchContext(var74);
                         pc = var13;
                         break;
                     case 59:
@@ -721,9 +702,7 @@ public class Run {
                         System.out.print(" ");
                         int var58 = next(true); // new module index
                         oldIndex = currContext.moduleIndex;
-                        if (!contextHandler.switchContext(var58)) {
-                            throw new VMException("module context switch failed during module_switch");
-                        }
+                        contextHandler.switchContext(var58);
                         break;
                     default:
                         throw new VMException("wrong opcode " + var0);
