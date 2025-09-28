@@ -20,6 +20,8 @@ public class Run {
     static Context currContext;
     static ContextHandler contextHandler = ContextHandler.getInstance();
     static int oldIndex;
+    static long globalTimestamp = 0;
+    static boolean errorReported = false;
 
     static boolean debug;
     static int[] heap;
@@ -162,58 +164,70 @@ public class Run {
         return var0;
     }
 
-    static void load(Context context, String var0) throws IOException, FormatException {
-        byte[] var2 = new byte[2];
-        DataInputStream var3 = new DataInputStream(new FileInputStream(var0));
-        var3.read(var2, 0, 2);
-        if (var2[0] != 77 || var2[1] != 74) {
-            throw new FormatException("wrong marker");
-        }        
-        int var1 = var3.readInt();
-        if (var1 <= 0) {
-            throw new FormatException("codeSize <= 0");
-        } 
-        int dataSize = var3.readInt();
-        if (dataSize < 0) {
-            throw new FormatException("dataSize < 0");
-        } 
-        context.setDataSize(dataSize);
-        context.startPC = var3.readInt();
-        // validate startPC but only for 'main' context, not for other module contexts
-        if (context == currContext && (context.startPC < 0 || context.startPC >= var1)) {
-            throw new FormatException("startPC out of code area");
-        }
-        // read timestamp
-        context.timestamp = var3.readInt();
-        // read module name
-        StringBuilder moduleNameBuilder = new StringBuilder();
-        byte[] c = new byte[1];
-        var3.read(c);
-        while (c[0] != delimiter1) {
-            moduleNameBuilder.append((char)c[0]);
+    static void load(Context context, String var0, boolean setGlobalTimestamp) throws IOException, FormatException {
+        try (DataInputStream var3 = new DataInputStream(new FileInputStream(var0));) {
+            byte[] var2 = new byte[2];
+            // DataInputStream var3 = new DataInputStream(new FileInputStream(var0));
+            var3.read(var2, 0, 2);
+            if (var2[0] != 77 || var2[1] != 74) {
+                throw new FormatException("wrong marker");
+            }        
+            int var1 = var3.readInt();
+            if (var1 <= 0) {
+                throw new FormatException("codeSize <= 0");
+            } 
+            int dataSize = var3.readInt();
+            if (dataSize < 0) {
+                throw new FormatException("dataSize < 0");
+            } 
+            context.setDataSize(dataSize);
+            context.startPC = var3.readInt();
+            // validate startPC but only for 'main' context, not for other module contexts
+            if (context == currContext && (context.startPC < 0 || context.startPC >= var1)) {
+                throw new FormatException("startPC out of code area");
+            }
+            // read timestamp
+            context.timestamp = var3.readLong();
+            // read module name
+            StringBuilder moduleNameBuilder = new StringBuilder();
+            byte[] c = new byte[1];
             var3.read(c);
-        }
-        // read module index
-        context.moduleIndex = var3.readInt();
-        context.moduleName = moduleNameBuilder.toString();
-        // add this context to context entries
-        context.addEntryToEntryMap(context.moduleIndex, context.moduleName);
-        // read module map
-        var3.read(c);
-        while (true) {
-            StringBuilder entryNameBuilder = new StringBuilder();
-            while (c[0] != delimiter1 && c[0] != delimiter2) {
-                entryNameBuilder.append((char)c[0]);
+            while (c[0] != delimiter1) {
+                moduleNameBuilder.append((char)c[0]);
                 var3.read(c);
             }
-            String entryName = entryNameBuilder.toString();
-            if (c[0] == delimiter2) break;
-            int modIndex = var3.readInt();
-            context.addEntryToEntryMap(modIndex, entryName);
+            // read module index
+            context.moduleIndex = var3.readInt();
+            context.moduleName = moduleNameBuilder.toString();
+            // set or check global timestamp (this needs to be after reading module name)
+            if (setGlobalTimestamp) {
+                globalTimestamp = context.timestamp;
+            } else if (context.timestamp > globalTimestamp) {
+                throw new VMException("Module " + context.getModuleName() + " has been recompiled since the main module (" + currContext.getModuleName() + ") compilation");
+            }
+            // add this context to context entries
+            context.addEntryToEntryMap(context.moduleIndex, context.moduleName);
+            // read module map
             var3.read(c);
+            while (true) {
+                StringBuilder entryNameBuilder = new StringBuilder();
+                while (c[0] != delimiter1 && c[0] != delimiter2) {
+                    entryNameBuilder.append((char)c[0]);
+                    var3.read(c);
+                }
+                String entryName = entryNameBuilder.toString();
+                if (c[0] == delimiter2) break;
+                int modIndex = var3.readInt();
+                context.addEntryToEntryMap(modIndex, entryName);
+                var3.read(c);
+            }
+            context.code = new byte[var1];
+            var3.read(context.code, 0, var1);
+        }catch (VMException var8) {
+            errorReported = true;
+            System.out.println("-- compilation overlap error " + var8.getMessage());
         }
-        context.code = new byte[var1];
-        var3.read(context.code, 0, var1);
+        
     }
 
     static int alloc(int var0) throws VMException {
@@ -727,7 +741,7 @@ public class Run {
         return moduleName.substring(lastDotIndex + 1);
     }
 
-    private static void addAllTransitiveModulesContextsFromCurrentContext() {
+    private static void addAllTransitiveModulesContextsFromCurrentContext() throws VMException {
         for (String moduleName : currContext.getModuleNames()) {
             if (moduleName.equals(currContext.moduleName)) {
                 continue; // skip loading the current module again
@@ -738,12 +752,15 @@ public class Run {
             String fullName = outputFolderPath.resolve(name + ".obj").toString();
             System.out.println("Loading module: " + fullName);
             try {
-                load(moduleContext, fullName);
+                load(moduleContext, fullName, false);
             } catch (IOException | FormatException e) {
                 System.out.println("-- error loading module " + fullName + ": " + e.getMessage());
                 continue;
             }
             contextHandler.addEntryToContextMap(moduleContext); // add loaded module context to context entries
+        }
+        if (errorReported) {
+            throw new VMException("Execution aborted due to previous errors in loading modules");
         }
     }
     public static void main(String[] var0) {
@@ -763,7 +780,7 @@ public class Run {
             try {
                 currContext = new Context();
                 outputFolderPath = Paths.get(var1).getParent();
-                load(currContext, var1);
+                load(currContext, var1, true);
                 contextHandler.addEntryToContextMap(currContext); // add main module context to context entries
                 ContextHandler.getInstance().setEntryMap(currContext.getEntryMap()); // set global entry map for resolving context indexes
                 addAllTransitiveModulesContextsFromCurrentContext();
@@ -784,8 +801,9 @@ public class Run {
                 System.out.println("-- error reading file " + var1);
             } catch (FormatException var6) {
                 System.out.println("-- corrupted object file " + var1 + ": " + var6.getMessage());
+            } catch (VMException var8) {
+                System.out.println("-- virtual machine error: " + var8.getMessage());
             }
-
         }
     }
 }

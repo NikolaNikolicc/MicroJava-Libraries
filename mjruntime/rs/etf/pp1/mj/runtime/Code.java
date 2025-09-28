@@ -96,6 +96,7 @@ public class Code {
 	}
   public static void put2 (int x) { put(x>>8); put(x);  }
   public static void put4 (int x) { put2(x>>16); put2(x); }
+  public static void put8 (long x) { put4((int)(x>>32)); put4((int)x); }
 
   public static void put2 (int pos, int x)
   {
@@ -225,7 +226,7 @@ public class Code {
       put4(dataSize);
       put4(mainPc);
       long ts = System.currentTimeMillis() / 1000L;
-      put4((int) ts);    // timestamp
+      put8(ts); // timestamp
       putString(moduleName, Run.delimiter1);   // module name
       put4(moduleIndex); // module index
       putModuleMap();    // module map

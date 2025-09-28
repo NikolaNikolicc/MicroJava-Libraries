@@ -13,7 +13,7 @@ public class Context {
     private int dataSize;
     public int startPC;
 
-    public int timestamp;
+    public long timestamp;
     public String moduleName;
     public int moduleIndex;
     private  EntryDataStructure entryMap;

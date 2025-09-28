@@ -27,6 +27,10 @@ public class disasm {
 	private static int get4() {
 		return (get2()<<16) + (get2()<<16>>>16);
 	}
+
+	private static long get8() {
+		return ((long)get4()<<32) + (get4()&0xFFFFFFFFL);
+	}
 	
 	private static String jumpDist() {
 		int dist = get2();
@@ -172,7 +176,7 @@ public class disasm {
 				System.out.println("codeSize="+get4());
 				System.out.println("dataSize="+get4());
 				System.out.println("mainPC="+get4());
-				System.out.println("timestamp="+get4());
+				System.out.println("timestamp="+get8());
 				readModuleNameAndIndex();
 				readModuleMap();
 				off=cur;
