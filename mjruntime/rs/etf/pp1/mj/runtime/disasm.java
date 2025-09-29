@@ -142,7 +142,7 @@ public class disasm {
 			moduleNameBuilder.append((char) c);
 			c = get();
 		}
-		System.out.println("moduleName=" + moduleNameBuilder.toString() + " (moduleIndex=" + get4() + ")");
+		System.out.println("moduleName=" + moduleNameBuilder.toString() + " (moduleIndex=" + get() + ")");
 	}
 
 	private static void readModuleMap() {
@@ -156,7 +156,7 @@ public class disasm {
 			if ((char) c == Run.delimiter2) {
 				break;
 			}
-			int index = get4();
+			int index = get();
 			System.out.println("moduleMap entry: " + entryNameBuilder.toString() + " -> " + index);
 			addEntryToEntryMap(index, entryNameBuilder.toString());
 			c = get();

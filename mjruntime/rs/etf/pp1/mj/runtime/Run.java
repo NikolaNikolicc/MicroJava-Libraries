@@ -197,7 +197,7 @@ public class Run {
                 var3.read(c);
             }
             // read module index
-            context.moduleIndex = var3.readInt();
+            context.moduleIndex = (int)var3.readByte();
             context.moduleName = moduleNameBuilder.toString();
             // set or check global timestamp (this needs to be after reading module name)
             if (setGlobalTimestamp) {
@@ -217,7 +217,7 @@ public class Run {
                 }
                 String entryName = entryNameBuilder.toString();
                 if (c[0] == delimiter2) break;
-                int modIndex = var3.readInt();
+                int modIndex = (int)var3.readByte();
                 context.addEntryToEntryMap(modIndex, entryName);
                 var3.read(c);
             }

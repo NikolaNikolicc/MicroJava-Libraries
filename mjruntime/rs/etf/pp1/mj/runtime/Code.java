@@ -211,7 +211,7 @@ public class Code {
           String name = m.getName();
           int index = m.getIndex();
           putString(name, Run.delimiter1); 
-          put4(index);
+          put(index);
       }
     }
     put(Run.delimiter2); 
@@ -228,7 +228,7 @@ public class Code {
       long ts = System.currentTimeMillis() / 1000L;
       put8(ts); // timestamp
       putString(moduleName, Run.delimiter1);   // module name
-      put4(moduleIndex); // module index
+      put(moduleIndex); // module index
       putModuleMap();    // module map
       s.write(buf, codeSize, pc - codeSize);	// header
       s.write(buf, 0, codeSize);				// code
